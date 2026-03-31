@@ -1,7 +1,10 @@
+# events/models.py
+
 from django.db import models
 from users.models import User
 from students.models import Student
 from instructors.models import Instructor
+
 
 class EventCategory(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -15,6 +18,7 @@ class EventCategory(models.Model):
     def __str__(self):
         return self.name
 
+
 class Event(models.Model):
     STATUS_CHOICES = (
         ('draft', 'Draft'),
@@ -24,8 +28,27 @@ class Event(models.Model):
     )
 
     id = models.BigAutoField(primary_key=True)
-    category = models.ForeignKey(EventCategory, on_delete=models.SET_NULL, null=True, related_name='events')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_events')
+
+    category = models.ForeignKey(
+        EventCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='events'
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_events'
+    )
+    template = models.ForeignKey(
+        'certificados.Template',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='events'
+    )
+
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     event_date = models.DateField()
@@ -33,6 +56,8 @@ class Event(models.Model):
     duration_hours = models.IntegerField(null=True, blank=True)
     location = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    is_active = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,16 +71,17 @@ class Event(models.Model):
     def __str__(self):
         return f"{self.name} ({self.event_date.strftime('%d/%m/%Y')})"
 
+
 class EventInstructor(models.Model):
     event = models.ForeignKey(
         Event,
         on_delete=models.CASCADE,
-        related_name="instructors"
+        related_name='instructors'
     )
     instructor = models.ForeignKey(
         Instructor,
         on_delete=models.CASCADE,
-        related_name="events"
+        related_name='events'
     )
     role = models.CharField(max_length=50, default='principal')
 
@@ -67,16 +93,17 @@ class EventInstructor(models.Model):
     def __str__(self):
         return f"{self.event.name} - {self.instructor.full_name} ({self.role})"
 
+
 class Enrollment(models.Model):
     student = models.ForeignKey(
         Student,
         on_delete=models.CASCADE,
-        related_name="enrollments"
+        related_name='enrollments'
     )
     event = models.ForeignKey(
         Event,
         on_delete=models.CASCADE,
-        related_name="enrollments"
+        related_name='enrollments'
     )
     enrolled_at = models.DateTimeField(auto_now_add=True)
     attendance = models.BooleanField(default=False)
