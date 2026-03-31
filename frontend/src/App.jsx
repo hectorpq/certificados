@@ -1,46 +1,48 @@
-// frontend/src/App.jsx
+// src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import Login from './pages/Login'
+import Eventos from './pages/Eventos'
+import Certificados from './pages/Certificados'
+import Navbar from './components/Navbar'
+import { globalCSS } from './theme'
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Eventos from './pages/Eventos';
-import Estudiantes from './pages/Estudiantes';
-import Certificados from './pages/Certificados';
-import GeneradorPublico from './pages/GeneradorPublico';
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem('token')
+  return token ? children : <Navigate to="/login" />
+}
 
-function App() {
+export default function App() {
+  // Inyectar CSS global una sola vez
+  useEffect(() => {
+    const id = 'cp-global-styles'
+    if (!document.getElementById(id)) {
+      const tag = document.createElement('style')
+      tag.id = id
+      tag.textContent = globalCSS
+      document.head.appendChild(tag)
+    }
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta pública - Principal */}
-        <Route path="/" element={<GeneradorPublico />} />
-        
-        {/* Ruta de login */}
         <Route path="/login" element={<Login />} />
-        
-        {/* Rutas protegidas */}
-        <Route path="/eventos" element={
+        <Route path="/*" element={
           <PrivateRoute>
-            <Eventos />
-          </PrivateRoute>
-        } />
-        <Route path="/estudiantes" element={
-          <PrivateRoute>
-            <Estudiantes />
-          </PrivateRoute>
-        } />
-        <Route path="/certificados" element={
-          <PrivateRoute>
-            <Certificados />
+            <div style={{ minHeight: '100vh', background: '#0e0e0f' }}>
+              <Navbar />
+              <div style={{ maxWidth: '720px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+                <Routes>
+                  <Route path="/eventos"      element={<Eventos />} />
+                  <Route path="/certificados" element={<Certificados />} />
+                  <Route path="*"             element={<Navigate to="/certificados" />} />
+                </Routes>
+              </div>
+            </div>
           </PrivateRoute>
         } />
       </Routes>
     </BrowserRouter>
-  );
+  )
 }
-
-function PrivateRoute({ children }) {
-  const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" />;
-}
-
-export default App;
