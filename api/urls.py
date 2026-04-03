@@ -15,6 +15,7 @@ from .views import (
     listar_templates,
     actualizar_template,
 )
+from .generador_views import procesar_excel, crear_masivo
 
 router = SimpleRouter()
 router.register(r'certificates', CertificateViewSet, basename='certificate')
@@ -37,4 +38,8 @@ urlpatterns = [
     path('templates/crear/', crear_template_con_imagen, name='crear_template'),
     path('templates/', listar_templates, name='listar_templates'),
     path('templates/<int:template_id>/', actualizar_template, name='actualizar_template'),
+
+    # Generador masivo (nuevo)
+    path('generar/procesar-excel/', procesar_excel, name='procesar_excel'),
+    path('generar/crear-masivo/', crear_masivo, name='crear_masivo'),
 ]
