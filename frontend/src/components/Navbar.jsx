@@ -14,8 +14,7 @@ export default function Navbar() {
   }
 
   const links = [
-    { to: '/certificados', label: 'Certificados' },
-    { to: '/eventos',      label: 'Eventos'       },
+    { to: '/generar',      label: '🎓 Generar'     },
   ]
 
   return (

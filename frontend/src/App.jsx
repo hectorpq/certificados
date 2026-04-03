@@ -2,15 +2,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import Login from './pages/Login'
-import Eventos from './pages/Eventos'
-import Certificados from './pages/Certificados'
+import GeneradorCertificados from './pages/GeneradorCertificados'
 import Navbar from './components/Navbar'
 import { globalCSS } from './theme'
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token')
-  return token ? children : <Navigate to="/login" />
+  return token ? children : <Navigate to="/login" replace />
 }
+
+const Layout = ({ children }) => (
+  <div style={{ minHeight: '100vh', background: '#0e0e0f', display: 'flex', flexDirection: 'column' }}>
+    <Navbar />
+    <div style={{ flex: 1, width: '100%', padding: '2rem 1.5rem', overflowY: 'auto' }}>
+      {children}
+    </div>
+  </div>
+)
 
 export default function App() {
   // Inyectar CSS global una sola vez
@@ -25,23 +33,18 @@ export default function App() {
   }, [])
 
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/*" element={
+        <Route path="/generar" element={
           <PrivateRoute>
-            <div style={{ minHeight: '100vh', background: '#0e0e0f' }}>
-              <Navbar />
-              <div style={{ maxWidth: '720px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
-                <Routes>
-                  <Route path="/eventos"      element={<Eventos />} />
-                  <Route path="/certificados" element={<Certificados />} />
-                  <Route path="*"             element={<Navigate to="/certificados" />} />
-                </Routes>
-              </div>
-            </div>
+            <Layout>
+              <GeneradorCertificados />
+            </Layout>
           </PrivateRoute>
         } />
+        <Route path="/" element={<Navigate to="/generar" replace />} />
+        <Route path="*" element={<Navigate to="/generar" replace />} />
       </Routes>
     </BrowserRouter>
   )

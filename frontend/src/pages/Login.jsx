@@ -8,12 +8,21 @@ export default function Login() {
   const navigate = useNavigate()
 
   const handleSuccess = (credentialResponse) => {
-    const decoded = jwtDecode(credentialResponse.credential)
-    localStorage.setItem('token', credentialResponse.credential)
-    localStorage.setItem('user_name', decoded.name)
-    localStorage.setItem('user_email', decoded.email)
-    localStorage.setItem('user_picture', decoded.picture)
-    navigate('/certificados')
+    try {
+      const decoded = jwtDecode(credentialResponse.credential)
+      
+      // Guardar JWT de Google directamente como token
+      localStorage.setItem('token', credentialResponse.credential)
+      localStorage.setItem('user_name', decoded.name || '')
+      localStorage.setItem('user_email', decoded.email || '')
+      localStorage.setItem('user_picture', decoded.picture || '')
+      
+      console.log('Login exitoso:', decoded.email)
+      navigate('/generar')
+    } catch (error) {
+      console.error('Error al procesar token:', error.message)
+      alert('Error al iniciar sesión. Por favor intenta de nuevo.')
+    }
   }
 
   return (
