@@ -1,20 +1,51 @@
 // src/components/Navbar.jsx
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import api from '../api/axios'
 import { colors, styles } from '../theme'
 
 export default function Navbar() {
   const navigate     = useNavigate()
   const location     = useLocation()
   const userName     = localStorage.getItem('user_name')    || 'Usuario'
-  const userPicture  = localStorage.getItem('user_picture')
+  const isAdmin      = localStorage.getItem('is_admin') === 'true'
+  const isLoggedIn   = !!localStorage.getItem('token')
+  const [adminMode, setAdminMode] = useState(localStorage.getItem('admin_mode') === 'true')
+  const [toggling, setToggling] = useState(false)
+  const [appPasswordConfigured, setAppPasswordConfigured] = useState(null)
 
   const logout = () => {
     localStorage.clear()
     navigate('/login')
   }
 
+  const toggleAdminMode = async () => {
+    if (!isAdmin) return
+    setToggling(true)
+    try {
+      const res = await api.post('/perfil/toggle-admin/')
+      const newMode = res.data.admin_mode_enabled
+      setAdminMode(newMode)
+      localStorage.setItem('admin_mode', newMode ? 'true' : 'false')
+    } catch (err) {
+      console.error('Error al toggle admin mode:', err)
+    } finally {
+      setToggling(false)
+    }
+  }
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      api.get('/perfil/').then(res => {
+        setAppPasswordConfigured(res.data.email_app_password_configured)
+      }).catch(() => {})
+    }
+  }, [isLoggedIn])
+
   const links = [
     { to: '/generar',      label: '🎓 Generar'     },
+    { to: '/eventos',      label: '📅 Eventos'     },
+    { to: '/certificados', label: '📜 Certificados'},
   ]
 
   return (
@@ -83,6 +114,51 @@ export default function Navbar() {
 
       {/* Right: user info + logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
+
+        {/* Admin Mode Toggle */}
+        {isAdmin && (
+          <button
+            onClick={toggleAdminMode}
+            disabled={toggling}
+            style={{
+              padding: '.3rem .7rem',
+              borderRadius: '6px',
+              fontSize: '11px',
+              fontWeight: 600,
+              border: `1px solid ${adminMode ? colors.mintBorder : colors.border}`,
+              background: adminMode ? colors.mintMuted : 'transparent',
+              color: adminMode ? colors.mint : colors.textMuted,
+              cursor: isAdmin ? 'pointer' : 'not-allowed',
+              opacity: toggling ? 0.6 : 1,
+              transition: 'all .2s',
+            }}
+            title={adminMode ? 'Modo Admin ACTIVADO' : 'Modo Admin desactivado'}
+          >
+            {adminMode ? '✓ Admin' : 'Admin'}
+          </button>
+        )}
+
+        {/* App Password Indicator */}
+        {isLoggedIn && (
+          <Link
+            to="/perfil"
+            title={appPasswordConfigured ? 'App Password configurado' : 'Configurar App Password'}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              background: appPasswordConfigured === null ? 'transparent' : appPasswordConfigured ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
+              border: `1px solid ${appPasswordConfigured === null ? colors.border : appPasswordConfigured ? 'rgba(34,197,94,0.3)' : 'rgba(245,158,11,0.3)'}`,
+              textDecoration: 'none',
+            }}
+          >
+            {appPasswordConfigured === null ? '⚙️' : appPasswordConfigured ? '✓' : '⚠️'}
+          </Link>
+        )}
 
         {/* Avatar */}
         {userPicture ? (

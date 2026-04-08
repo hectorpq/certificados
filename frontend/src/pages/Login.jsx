@@ -1,24 +1,34 @@
 // src/pages/Login.jsx
 import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
-import { jwtDecode } from 'jwt-decode'
+import api from '../api/axios'
 import { colors, styles } from '../theme'
 
 export default function Login() {
   const navigate = useNavigate()
 
-  const handleSuccess = (credentialResponse) => {
+  const handleSuccess = async (credentialResponse) => {
     try {
-      const decoded = jwtDecode(credentialResponse.credential)
+      // Enviar token al backend para validar y crear usuario
+      const res = await api.post('/auth/google/', {
+        credential: credentialResponse.credential
+      })
       
-      // Guardar JWT de Google directamente como token
-      localStorage.setItem('token', credentialResponse.credential)
-      localStorage.setItem('user_name', decoded.name || '')
-      localStorage.setItem('user_email', decoded.email || '')
-      localStorage.setItem('user_picture', decoded.picture || '')
-      
-      console.log('Login exitoso:', decoded.email)
-      navigate('/generar')
+      if (res.data.success) {
+        const { user, token } = res.data
+        
+        // Guardar datos del usuario
+        localStorage.setItem('token', token)
+        localStorage.setItem('user_id', user.id || '')
+        localStorage.setItem('user_name', user.full_name || '')
+        localStorage.setItem('user_email', user.email || '')
+        localStorage.setItem('user_role', user.role || 'student')
+        localStorage.setItem('is_admin', user.is_admin ? 'true' : 'false')
+        localStorage.setItem('admin_mode', user.is_admin_mode ? 'true' : 'false')
+        
+        console.log('Login exitoso:', user.email)
+        navigate('/')
+      }
     } catch (error) {
       console.error('Error al procesar token:', error.message)
       alert('Error al iniciar sesión. Por favor intenta de nuevo.')
