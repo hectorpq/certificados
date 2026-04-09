@@ -1,26 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import api from '../api/axios'
-import { colors, styles } from '../theme'
-
-const uploadBoxStyles = {
-  border: `2px dashed ${colors.gold}`,
-  borderRadius: '8px',
-  padding: '1.5rem',
-  cursor: 'pointer',
-  transition: 'all 0.3s',
-  textAlign: 'center',
-}
-
-const canvasContainerStyles = {
-  border: `1px solid ${colors.gold}`,
-  borderRadius: '8px',
-  overflow: 'auto',
-  maxWidth: '100%',
-  background: '#1a1a1b',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-}
+import { colors, styles, sectionStyles } from '../styles/theme'
 
 export default function GeneradorCertificados() {
   const [loading, setLoading] = useState(false)
@@ -173,11 +153,9 @@ export default function GeneradorCertificados() {
         responseType: 'blob'
       })
       
-      // Extraer información de los headers
       const generados = res.headers['x-generados'] || 0
       const emails = res.headers['x-emails'] || 0
       
-      // Descargar el ZIP
       const url = window.URL.createObjectURL(new Blob([res.data]))
       const link = document.createElement('a')
       link.href = url
@@ -196,21 +174,48 @@ export default function GeneradorCertificados() {
     }
   }
 
+  const inputStyle = {
+    display: 'none',
+  }
+
+  const labelUploadStyle = {
+    border: `2px dashed ${colors.gold}`,
+    borderRadius: '8px',
+    padding: '1.5rem',
+    cursor: 'pointer',
+    transition: 'all 0.3s',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    minHeight: '80px',
+  }
+
+  const headerStyle = {
+    color: colors.text,
+    fontSize: '2rem',
+    margin: '0',
+    lineHeight: '1.2',
+    fontWeight: 'bold',
+  }
+
+  const sectionTitleStyle = {
+    color: colors.text,
+    margin: '0 0 0.5rem 0',
+    fontSize: '0.95rem',
+  }
+
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <h1 style={{ color: '#fff', fontSize: '2rem', margin: '0', lineHeight: '1.2', fontWeight: 'bold' }}>
-        Generador
-      </h1>
+      <h1 style={headerStyle}>Generador</h1>
 
-      {msg && <div style={{ ...styles.success, fontSize: '0.9rem', padding: '0.75rem 1rem', borderRadius: '6px' }}>{msg}</div>}
-      {error && <div style={{ ...styles.error, fontSize: '0.9rem', padding: '0.75rem 1rem', borderRadius: '6px' }}>{error}</div>}
+      {msg && <div style={styles.success}>{msg}</div>}
+      {error && <div style={styles.error}>{error}</div>}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 0.85fr) 1.5fr', gap: '1.5rem', minHeight: '600px' }}>
-        {/* IZQUIERDA */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minHeight: 0, overflow: 'auto' }}>
-          {/* TEMPLATE */}
-          <div style={{ background: '#1a1a1b', padding: '1rem', borderRadius: '6px', border: `1px solid ${colors.gold}`, flex: 'none' }}>
-            <h3 style={{ color: '#fff', margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Template</h3>
+          <div style={sectionStyles.template}>
+            <h3 style={sectionTitleStyle}>Template</h3>
             {!templatePreview ? (
               <div>
                 <input
@@ -218,11 +223,11 @@ export default function GeneradorCertificados() {
                   type="file"
                   accept=".png,.jpg,.jpeg"
                   onChange={handleTemplateUpload}
-                  style={{ display: 'none' }}
+                  style={inputStyle}
                 />
-                <label htmlFor="template-input" style={{ ...uploadBoxStyles, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80px', padding: '1rem' }}>
+                <label htmlFor="template-input" style={labelUploadStyle}>
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>+</div>
-                  <div style={{ color: '#fff', fontSize: '0.75rem' }}>PNG o JPG</div>
+                  <div style={{ color: colors.text, fontSize: '0.75rem' }}>PNG o JPG</div>
                 </label>
               </div>
             ) : (
@@ -240,9 +245,8 @@ export default function GeneradorCertificados() {
             )}
           </div>
 
-          {/* EXCEL */}
-          <div style={{ background: '#1a1a1b', padding: '1rem', borderRadius: '6px', border: `1px solid ${colors.gold}`, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ color: '#fff', margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Excel</h3>
+          <div style={{ ...sectionStyles.excel, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <h3 style={sectionTitleStyle}>Excel</h3>
             {excelData.length === 0 ? (
               <div>
                 <input
@@ -251,23 +255,23 @@ export default function GeneradorCertificados() {
                   accept=".xlsx,.xls"
                   onChange={handleExcelUpload}
                   disabled={loading}
-                  style={{ display: 'none' }}
+                  style={inputStyle}
                 />
-                <label htmlFor="excel-input" style={{ ...uploadBoxStyles, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80px', padding: '1rem', opacity: loading ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto' }}>
+                <label htmlFor="excel-input" style={{ ...labelUploadStyle, opacity: loading ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto' }}>
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>+</div>
-                  <div style={{ color: '#fff', fontSize: '0.75rem' }}>
+                  <div style={{ color: colors.text, fontSize: '0.75rem' }}>
                     {loading ? 'Procesando...' : 'Nombres, Apellidos, Email'}
                   </div>
                 </label>
               </div>
             ) : (
-              <div style={{ fontSize: '0.75rem', color: '#999', flex: 1, overflowY: 'auto' }}>
+              <div style={{ fontSize: '0.75rem', color: colors.textMuted, flex: 1, overflowY: 'auto' }}>
                 <p style={{ color: colors.gold, margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>
                   {excelData.length} registros
                 </p>
                 {excelData.slice(0, 15).map((item, i) => (
                   <div key={i} style={{ padding: '0.3rem 0', borderBottom: '1px solid #333', fontSize: '0.7rem' }}>
-                    <span style={{ color: '#fff' }}>{item.nombre} {item.apellido}</span>
+                    <span style={{ color: colors.text }}>{item.nombre} {item.apellido}</span>
                     <br />
                     <span style={{ fontSize: '0.65rem', color: colors.gold }}>{item.email}</span>
                   </div>
@@ -281,13 +285,12 @@ export default function GeneradorCertificados() {
             )}
           </div>
 
-          {/* CONFIG */}
-          <div style={{ background: '#1a1a1b', padding: '1rem', borderRadius: '6px', border: `1px solid ${colors.gold}`, flex: 'none', maxHeight: '280px', overflowY: 'auto' }}>
-            <h3 style={{ color: '#fff', margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Config</h3>
+          <div style={{ ...sectionStyles.config, flex: 'none', maxHeight: '280px', overflowY: 'auto' }}>
+            <h3 style={sectionTitleStyle}>Config</h3>
             {excelData.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div>
-                  <label style={{ color: '#fff', fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>
+                  <label style={{ color: colors.text, fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>
                     Tamaño: {templateData.fontSize}px
                   </label>
                   <input
@@ -303,7 +306,7 @@ export default function GeneradorCertificados() {
                 </div>
 
                 <div>
-                  <label style={{ color: '#fff', fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>
+                  <label style={{ color: colors.text, fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>
                     Color
                   </label>
                   <input
@@ -317,7 +320,7 @@ export default function GeneradorCertificados() {
                 </div>
 
                 <div>
-                  <label style={{ color: '#fff', fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>
+                  <label style={{ color: colors.text, fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>
                     Registro {previewIndex + 1} / {excelData.length}
                   </label>
                   <input
@@ -328,7 +331,7 @@ export default function GeneradorCertificados() {
                     onChange={(e) => setPreviewIndex(parseInt(e.target.value))}
                     style={{ width: '100%', height: '6px' }}
                   />
-                  <div style={{ color: colors.gold, fontSize: '0.7rem', marginTop: '0.25rem', padding: '0.4rem', background: '#0e0e0f', borderRadius: '4px' }}>
+                  <div style={{ color: colors.gold, fontSize: '0.7rem', marginTop: '0.25rem', padding: '0.4rem', background: colors.dark, borderRadius: '4px' }}>
                     <strong>{excelData[previewIndex]?.nombre} {excelData[previewIndex]?.apellido}</strong>
                     <br />
                     <span style={{ fontSize: '0.65rem' }}>{excelData[previewIndex]?.email}</span>
@@ -352,19 +355,27 @@ export default function GeneradorCertificados() {
                 </button>
               </div>
             ) : (
-              <div style={{ color: '#999', textAlign: 'center', fontSize: '0.85rem' }}>
+              <div style={{ color: colors.textMuted, textAlign: 'center', fontSize: '0.85rem' }}>
                 Sube Excel primero
               </div>
             )}
           </div>
         </div>
 
-        {/* DERECHA */}
-        <div style={{ background: '#1a1a1b', padding: '1rem', borderRadius: '6px', border: `1px solid ${colors.gold}`, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <h3 style={{ color: '#fff', margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>
-            Preview
-          </h3>
-          <div style={{ ...canvasContainerStyles, flex: 1, minHeight: 0 }}>
+        <div style={{ ...sectionStyles.preview, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <h3 style={sectionTitleStyle}>Preview</h3>
+          <div style={{
+            border: `1px solid ${colors.gold}`,
+            borderRadius: '8px',
+            overflow: 'auto',
+            maxWidth: '100%',
+            background: colors.darkSecondary,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flex: 1,
+            minHeight: 0,
+          }}>
             {templatePreview ? (
               <canvas
                 ref={canvasRef}
@@ -385,7 +396,7 @@ export default function GeneradorCertificados() {
               </div>
             )}
           </div>
-          <p style={{ color: '#999', fontSize: '0.65rem', margin: '0.5rem 0 0 0', textAlign: 'center' }}>
+          <p style={{ color: colors.textMuted, fontSize: '0.65rem', margin: '0.5rem 0 0 0', textAlign: 'center' }}>
             Arrastra para posicionar
           </p>
         </div>
