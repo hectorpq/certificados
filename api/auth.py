@@ -54,14 +54,19 @@ class CustomTokenAuthentication(BaseAuthentication):
                 logger.error('Email o sub no encontrado en JWT')
                 return None
             
-            # Obtain or create user
+            # Obtener o crear usuario con nombre completo
+            full_name = decoded.get('name', '') or ''
             user, created = User.objects.get_or_create(
                 email=email,
                 defaults={
-                    'username': email.split('@')[0][:150],  # Limitar a 150 chars
-                    'first_name': (decoded.get('name', '') or '').split()[0][:30],
+                    'full_name': full_name,
                 }
             )
+            
+            # Actualizar nombre si cambió
+            if user.full_name != full_name:
+                user.full_name = full_name
+                user.save(update_fields=['full_name'])
             
             logger.info(f"Usuario autenticado con JWT: {email} (nuevo: {created})")
             return (user, token)

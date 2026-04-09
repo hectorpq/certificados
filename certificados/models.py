@@ -97,6 +97,7 @@ class Certificate(models.Model):
     verification_code = models.CharField(max_length=50, unique=True)
 
     pdf_url = models.TextField(blank=True)
+    pdf_file = models.FileField(upload_to='certificates/', null=True, blank=True)
 
     status = models.CharField(
         max_length=20,

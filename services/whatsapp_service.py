@@ -1,5 +1,5 @@
 """
-WhatsApp Service - Send certificates via WhatsApp using Twilio API
+WhatsApp Service - Send messages via WhatsApp using Twilio API
 """
 from twilio.rest import Client
 from django.conf import settings
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class WhatsAppService:
-    """Send certificate messages via WhatsApp using Twilio"""
+    """Send messages via WhatsApp using Twilio"""
     
     def __init__(self):
         """Initialize Twilio client"""
@@ -23,13 +23,13 @@ class WhatsAppService:
         else:
             self.client = None
     
-    def send_certificate(self, certificate, phone_number):
+    def send_message(self, phone_number, message_text):
         """
-        Send certificate message via WhatsApp
+        Send a text message via WhatsApp.
         
         Args:
-            certificate: Certificate object
             phone_number: WhatsApp phone number (with country code, e.g. +57...)
+            message_text: Text message to send
             
         Returns:
             dict: {'success': bool, 'message': str, 'sid': str}
@@ -54,22 +54,6 @@ class WhatsAppService:
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number
             
-            # Prepare message
-            message_text = f"""
-🎓 ¡Hola {certificate.student.first_name}!
-
-Tu certificado del evento "{certificate.event.name}" está listo.
-
-📜 Detalles:
-- Código: {certificate.verification_code}
-- PDF: {certificate.pdf_url}
-- Válido hasta: {certificate.expires_at.strftime('%d/%m/%Y')}
-
-¡Descárgalo desde el enlace!
-
-Sistema de Certificados
-            """.strip()
-            
             # Send via WhatsApp
             message = self.client.messages.create(
                 from_=f"whatsapp:{self.from_number}",
@@ -81,7 +65,7 @@ Sistema de Certificados
             
             return {
                 'success': True,
-                'message': f'WhatsApp message sent to {phone_number}',
+                'message': f'Message sent to {phone_number}',
                 'sid': message.sid,
                 'timestamp': timezone.now()
             }
@@ -94,6 +78,34 @@ Sistema de Certificados
                 'message': f'WhatsApp error: {error_msg}',
                 'sid': None
             }
+    
+    def send_certificate(self, certificate, phone_number):
+        """
+        Send certificate message via WhatsApp
+        
+        Args:
+            certificate: Certificate object
+            phone_number: WhatsApp phone number (with country code, e.g. +57...)
+            
+        Returns:
+            dict: {'success': bool, 'message': str, 'sid': str}
+        """
+        message_text = f"""
+🎓 ¡Hola {certificate.student.first_name}!
+
+Tu certificado del evento "{certificate.event.name}" está listo.
+
+📜 Detalles:
+- Código: {certificate.verification_code}
+- PDF: {certificate.pdf_url}
+- Válido hasta: {certificate.expires_at.strftime('%d/%m/%Y')}
+
+¡Descárgalo desde el enlace!
+
+Sistema de Certificados
+        """.strip()
+        
+        return self.send_message(phone_number, message_text)
     
     def send_bulk_certificates(self, certificates, phone_map=None):
         """

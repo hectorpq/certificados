@@ -9,7 +9,11 @@ from rest_framework import status
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.http import FileResponse
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+from reportlab.lib.pagesizes import landscape
+from io import BytesIO
 import pandas as pd
 import json
 import tempfile
@@ -27,9 +31,17 @@ logger = logging.getLogger(__name__)
 @parser_classes([MultiPartParser, FormParser])
 def procesar_excel(request):
     """
-    Procesa archivo Excel y extrae nombre, apellido, email
+    Procesa archivo Excel y extrae nombre, apellido, email.
+    Requiere autenticación y modo admin activo.
     Expect columnas: "Nombres" o "Nombre", y "Apellidos" o "Apellido", "Email"
     """
+    # Verificar modo admin
+    if not request.user.is_admin_mode:
+        return Response(
+            {'error': 'Solo disponible en modo administrador'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
     logger.info(f"procesar_excel - User: {request.user}, Files: {list(request.FILES.keys())}")
     
     if 'file' not in request.FILES:
@@ -48,23 +60,30 @@ def procesar_excel(request):
         df.columns = df.columns.str.lower().str.strip()
         logger.info(f"Columnas encontradas: {list(df.columns)}")
         
-        # Normalizar nombres de columnas
+        # Normalizar nombres de columnas (soportar nombre/nombres y apellido/apellidos)
         col_rename = {}
         for col in df.columns:
-            if 'nombre' in col and col not in ['nombres', 'apellidos']:
-                col_rename[col] = 'nombres'
-            elif 'apellido' in col:
-                col_rename[col] = 'apellidos'
-            elif 'email' in col or 'correo' in col:
-                col_rename[col] = 'email'
+            if 'nombre' in col.lower() and col not in ['nombre', 'nombres', 'apellido', 'apellidos']:
+                col_rename[col] = 'nombre'
+            elif 'apellido' in col.lower() and col not in ['nombre', 'nombres', 'apellido', 'apellidos']:
+                col_rename[col] = 'apellido'
+            elif 'email' in col.lower() or 'correo' in col.lower():
+                if 'email' not in df.columns:
+                    col_rename[col] = 'email'
         df.rename(columns=col_rename, inplace=True)
+        
+        # Normalizar nombres de columnas a nombre/apellido
+        if 'nombres' in df.columns:
+            df.rename(columns={'nombres': 'nombre'}, inplace=True)
+        if 'apellidos' in df.columns:
+            df.rename(columns={'apellidos': 'apellido'}, inplace=True)
         
         # Validar columnas requeridas
         columnas_faltantes = []
-        if 'nombres' not in df.columns:
-            columnas_faltantes.append('nombres')
-        if 'apellidos' not in df.columns:
-            columnas_faltantes.append('apellidos')
+        if 'nombre' not in df.columns:
+            columnas_faltantes.append('nombre')
+        if 'apellido' not in df.columns:
+            columnas_faltantes.append('apellido')
         if 'email' not in df.columns:
             columnas_faltantes.append('email')
         
@@ -77,8 +96,8 @@ def procesar_excel(request):
         # Extraer datos
         datos = []
         for idx, row in df.iterrows():
-            nombre = str(row['nombres']).strip()
-            apellido = str(row['apellidos']).strip()
+            nombre = str(row['nombre']).strip()
+            apellido = str(row['apellido']).strip()
             email = str(row['email']).strip().lower()
             
             # Validar email
@@ -112,51 +131,66 @@ def procesar_excel(request):
         )
 
 
-def _colocar_texto_en_imagen(img_path, nombre, apellido, posiciones, output_path):
+def _crear_pdf_desde_template(img_path, nombre, apellido, posiciones, output_path):
     """
-    Coloca el texto (nombre + apellido) en la imagen según las posiciones
+    Crea un PDF certificado usando la imagen como fondo y coloca el texto.
     
     Args:
-        img_path: Path a la imagen original
+        img_path: Path a la imagen template
         nombre: Nombre a escribir
         apellido: Apellido a escribir
         posiciones: dict con {x, y, fontSize, fontColor}
-        output_path: Path donde guardar la imagen con el texto
+        output_path: Path donde guardar el PDF
     """
     try:
-        # Abrir imagen original
+        # Abrir imagen para obtener dimensiones
         img = Image.open(img_path)
-        draw = ImageDraw.Draw(img)
+        img_width, img_height = img.size
         
-        # Preparar texto
-        texto_completo = f"{nombre} {apellido}"
+        # Crear PDF con las mismas dimensiones
+        c = canvas.Canvas(output_path, pagesize=(img_width, img_height))
         
-        # Intentar cargar una fuente
-        try:
-            fuente = ImageFont.truetype("arial.ttf", posiciones.get('fontSize', 32))
-        except:
-            try:
-                fuente = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", posiciones.get('fontSize', 32))
-            except:
-                fuente = ImageFont.load_default()
+        # Dibujar imagen de fondo
+        c.drawImage(
+            ImageReader(img_path),
+            0, 0,
+            width=img_width,
+            height=img_height
+        )
         
-        # Dibujar texto
-        color = posiciones.get('fontColor', '#000000')
-        # Convertir hex a RGB
-        if color.startswith('#'):
-            color = tuple(int(color[i:i+2], 16) for i in (1, 3, 5))
+        # Configurar texto
+        font_size = posiciones.get('fontSize', 32)
+        font_color = posiciones.get('fontColor', '#000000')
         
-        x = posiciones.get('x', 250)
-        y = posiciones.get('y', 300)
+        # Convertir color hex a RGB
+        if font_color.startswith('#'):
+            hex_color = font_color.lstrip('#')
+            r, g, b = (int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+            c.setFillColorRGB(r, g, b)
+        else:
+            c.setFillColor(font_color)
         
-        draw.text((x, y), texto_completo, fill=color, font=fuente)
+        c.setFont("Helvetica-Bold", font_size)
         
-        # Guardar
-        img.save(output_path)
+        # Posicionar texto
+        x = posiciones.get('x', img_width / 2)
+        y = posiciones.get('y', img_height / 2)
+        
+        # Escribir nombre y apellido en líneas separadas
+        nombre_completo = f"{nombre} {apellido}"
+        palabras = nombre_completo.split()
+        
+        if len(palabras) >= 2:
+            c.drawString(x, y + (font_size * 0.8), palabras[0])
+            c.drawString(x, y, ' '.join(palabras[1:]))
+        else:
+            c.drawString(x, y, nombre_completo)
+        
+        c.save()
         return True
     
     except Exception as e:
-        logger.error(f"Error colocando texto: {str(e)}")
+        logger.error(f"Error creando PDF: {str(e)}")
         raise
 
 
@@ -165,14 +199,21 @@ def _colocar_texto_en_imagen(img_path, nombre, apellido, posiciones, output_path
 @parser_classes([MultiPartParser, FormParser])
 def crear_masivo(request):
     """
-    Crea los certificados en masa y envía por email
-    
+    Crea los certificados en masa y envía por email.
+    Requiere autenticación y modo admin activo.
+
     Recibe:
     - template: imagen PNG/JPG
     - datos: JSON con lista de {nombre, apellido, email}
     - posiciones: JSON con {x, y, fontSize, fontColor}
     """
-    
+    # Verificar modo admin
+    if not request.user.is_admin_mode:
+        return Response(
+            {'error': 'Solo disponible en modo administrador'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
     if 'template' not in request.FILES:
         return Response(
             {'error': 'No se subió template'},
@@ -215,11 +256,11 @@ def crear_masivo(request):
                 apellido = registro['apellido']
                 email = registro['email']
                 
-                # Crear imagen con texto
-                filename = f"{nombre.replace(' ', '_')}_{apellido.replace(' ', '_')}.png"
+                # Crear PDF con texto
+                filename = f"{nombre.replace(' ', '_')}_{apellido.replace(' ', '_')}.pdf"
                 output_path = certificados_dir / filename
                 
-                _colocar_texto_en_imagen(
+                _crear_pdf_desde_template(
                     str(template_path),
                     nombre,
                     apellido,
@@ -244,13 +285,13 @@ def crear_masivo(request):
                 generados += 1
                 
             except Exception as e:
-                logger.error(f"Error procesando {registro['nombre']}: {str(e)}")
+                logger.error(f"Error procesando {registro.get('nombre', 'unknown')}: {str(e)}")
                 errores += 1
         
-        # Crear ZIP con todos los certificados
+        # Crear ZIP con todos los certificados PDF
         zip_path = Path(temp_dir) / 'certificados.zip'
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for archivo in certificados_dir.glob('*.png'):
+            for archivo in certificados_dir.glob('*.pdf'):
                 zf.write(archivo, arcname=archivo.name)
         
         # Retornar ZIP como descarga

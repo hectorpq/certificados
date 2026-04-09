@@ -5,7 +5,7 @@ from rest_framework import serializers
 from certificados.models import Certificate
 from deliveries.models import DeliveryLog
 from students.models import Student
-from events.models import Event
+from events.models import Event, Invitation
 
 
 class StudentSimpleSerializer(serializers.ModelSerializer):
@@ -171,3 +171,216 @@ class CertificateDeliverSerializer(serializers.Serializer):
                 "Invalid delivery method. Choose from: email, whatsapp, link"
             )
         return value
+
+
+# ─────────────────────────────────────────
+# EVENT SERIALIZERS
+# ─────────────────────────────────────────
+
+class EventListSerializer(serializers.ModelSerializer):
+    """Serializer for event list"""
+    created_by_name = serializers.CharField(source='created_by.full_name', read_only=True)
+    invitations_count = serializers.SerializerMethodField()
+    accepted_count = serializers.SerializerMethodField()
+    pending_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Event
+        fields = [
+            'id', 'name', 'description', 'event_date', 'end_date',
+            'location', 'instructor_name', 'instructor_bio',
+            'status', 'is_public', 'max_capacity',
+            'invitations_count', 'accepted_count', 'pending_count',
+            'created_by_name', 'created_at'
+        ]
+        read_only_fields = fields
+    
+    def get_invitations_count(self, obj):
+        return obj.invitations.count()
+    
+    def get_accepted_count(self, obj):
+        return obj.invitations.filter(status='accepted').count()
+    
+    def get_pending_count(self, obj):
+        return obj.invitations.filter(status__in=['pending', 'sent']).count()
+
+
+class EventDetailSerializer(serializers.ModelSerializer):
+    """Full serializer for event details"""
+    created_by_name = serializers.CharField(source='created_by.full_name', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    invitations = serializers.SerializerMethodField()
+    template_image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Event
+        fields = [
+            'id', 'name', 'description', 'event_date', 'end_date',
+            'location', 'instructor_name', 'instructor_bio',
+            'status', 'is_public', 'max_capacity', 'invitation_message',
+            'category', 'category_name', 'template',
+            'template_image', 'template_image_url',
+            'name_x', 'name_y', 'name_font_size',
+            'invitations', 'created_by', 'created_by_name',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def get_invitations(self, obj):
+        return obj.invitations.count()
+    
+    def get_template_image_url(self, obj):
+        if obj.template_image:
+            return obj.template_image.url
+        return None
+
+
+class EventCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating events"""
+    class Meta:
+        model = Event
+        fields = [
+            'name', 'description', 'event_date', 'end_date',
+            'location', 'instructor_name', 'instructor_bio',
+            'is_public', 'invitation_message', 'max_capacity',
+            'category', 'template'
+        ]
+    
+    def create(self, validated_data):
+        validated_data['status'] = 'draft'
+        user = self.context['request'].user
+        if user.is_authenticated:
+            validated_data['created_by'] = user
+        return super().create(validated_data)
+
+
+class EventTemplateSerializer(serializers.ModelSerializer):
+    """Serializer for updating event template settings"""
+    class Meta:
+        model = Event
+        fields = ['template_image', 'name_x', 'name_y', 'name_font_size']
+    
+    def validate_template_image(self, value):
+        if value:
+            if not value.name.lower().endswith(('.jpg', '.jpeg', '.png')):
+                raise serializers.ValidationError(
+                    "La imagen debe ser JPG o PNG"
+                )
+            if value.size > 10 * 1024 * 1024:  # 10MB
+                raise serializers.ValidationError(
+                    "La imagen no puede ser mayor a 10MB"
+                )
+        return value
+
+
+# ─────────────────────────────────────────
+# INVITATION SERIALIZERS
+# ─────────────────────────────────────────
+
+class InvitationListSerializer(serializers.ModelSerializer):
+    """Serializer for invitation list"""
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    sent_via_display = serializers.CharField(source='get_sent_via_display', read_only=True)
+    is_expired = serializers.SerializerMethodField()
+    invitation_url = serializers.CharField(read_only=True)
+    time_until_expiry = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Invitation
+        fields = [
+            'id', 'student_email', 'student_name', 'phone',
+            'status', 'status_display', 'sent_via', 'sent_via_display',
+            'invitation_url', 'is_expired', 'time_until_expiry',
+            'created_at', 'sent_at', 'accepted_at', 'expires_at'
+        ]
+        read_only_fields = fields
+    
+    def get_is_expired(self, obj):
+        return obj.is_expired()
+    
+    def get_time_until_expiry(self, obj):
+        from django.utils import timezone
+        if obj.is_expired():
+            return "Expirado"
+        remaining = obj.expires_at - timezone.now()
+        hours = int(remaining.total_seconds() / 3600)
+        minutes = int((remaining.total_seconds() % 3600) / 60)
+        return f"{hours}h {minutes}m"
+
+
+class InvitationCreateSerializer(serializers.Serializer):
+    """Serializer for creating invitations from Excel"""
+    file = serializers.FileField(required=True)
+    
+    def validate_file(self, value):
+        if not value.name.endswith(('.xlsx', '.xls', '.csv')):
+            raise serializers.ValidationError(
+                "El archivo debe ser Excel (.xlsx, .xls) o CSV"
+            )
+        return value
+
+
+class InvitationPublicSerializer(serializers.ModelSerializer):
+    """Serializer for public invitation view"""
+    event_name = serializers.CharField(source='event.name', read_only=True)
+    event_date = serializers.DateTimeField(source='event.event_date', read_only=True)
+    event_location = serializers.CharField(source='event.location', read_only=True)
+    instructor_name = serializers.CharField(source='event.instructor_name', read_only=True)
+    instructor_bio = serializers.CharField(source='event.instructor_bio', read_only=True)
+    invitation_message = serializers.CharField(source='event.invitation_message', read_only=True)
+    invitation_url = serializers.SerializerMethodField()
+    is_expired = serializers.SerializerMethodField()
+    time_until_expiry = serializers.SerializerMethodField()
+    already_accepted = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Invitation
+        fields = [
+            'id', 'student_name', 'student_email',
+            'event_name', 'event_date', 'event_location',
+            'instructor_name', 'instructor_bio', 'invitation_message',
+            'invitation_url',
+            'status', 'is_expired', 'time_until_expiry', 'already_accepted'
+        ]
+        read_only_fields = fields
+    
+    def get_invitation_url(self, obj):
+        return obj.event.get_invitation_url(obj)
+    
+    def get_is_expired(self, obj):
+        return obj.is_expired()
+    
+    def get_time_until_expiry(self, obj):
+        from django.utils import timezone
+        if obj.is_expired():
+            return "Expirado"
+        remaining = obj.expires_at - timezone.now()
+        hours = int(remaining.total_seconds() / 3600)
+        minutes = int((remaining.total_seconds() % 3600) / 60)
+        return f"{hours}h {minutes}m"
+    
+    def get_already_accepted(self, obj):
+        return obj.status == 'accepted'
+
+
+class AcceptInvitationSerializer(serializers.Serializer):
+    """Serializer for accepting invitation"""
+    first_name = serializers.CharField(max_length=100, required=False)
+    last_name = serializers.CharField(max_length=100, required=False)
+    user_token = serializers.CharField(required=False, allow_blank=True)
+    
+    def validate(self, data):
+        invitation = self.context.get('invitation')
+        if not invitation:
+            raise serializers.ValidationError("Invitación no encontrada")
+        
+        if invitation.is_expired():
+            raise serializers.ValidationError("Esta invitación ha expirado")
+        
+        if invitation.status == 'accepted':
+            raise serializers.ValidationError("Esta invitación ya fue aceptada")
+        
+        if invitation.status == 'declined':
+            raise serializers.ValidationError("Esta invitación fue rechazada")
+        
+        return data
