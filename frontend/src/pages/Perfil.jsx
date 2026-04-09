@@ -2,18 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-
-const colors = {
-  bg: '#0e0e0f',
-  surface: '#18181a',
-  gold: '#d4a361',
-  text: '#f0ede8',
-  textMuted: 'rgba(240,237,232,0.5)',
-  border: 'rgba(255,255,255,0.07)',
-  success: '#22c55e',
-  error: '#ef4444',
-  warning: '#f59e0b',
-}
+import { colors, styles } from '../theme'
 
 export default function Perfil() {
   const navigate = useNavigate()
@@ -106,7 +95,7 @@ export default function Perfil() {
       <div style={{ minHeight: '100vh', background: colors.bg }}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: colors.surface, borderBottom: `1px solid ${colors.border}` }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-            <div style={{ width: '2.5rem', height: '2.5rem', background: 'rgba(212,163,97,0.15)', border: '1px solid rgba(212,163,97,0.3)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '2.5rem', height: '2.5rem', background: colors.goldMuted, border: `1px solid ${colors.goldBorder}`, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '1.25rem' }}>🎓</span>
             </div>
             <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '1rem', color: colors.text, margin: 0 }}>
@@ -125,7 +114,7 @@ export default function Perfil() {
     <div style={{ minHeight: '100vh', background: colors.bg }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: colors.surface, borderBottom: `1px solid ${colors.border}` }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-          <div style={{ width: '2.5rem', height: '2.5rem', background: 'rgba(212,163,97,0.15)', border: '1px solid rgba(212,163,97,0.3)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '2.5rem', height: '2.5rem', background: colors.goldMuted, border: `1px solid ${colors.goldBorder}`, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ fontSize: '1.25rem' }}>🎓</span>
           </div>
           <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '1rem', color: colors.text, margin: 0 }}>
@@ -144,10 +133,12 @@ export default function Perfil() {
 
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: colors.text, marginBottom: '2rem' }}>Mi Perfil</h1>
 
-        {/* Info del usuario */}
-        <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+        {message && <div style={styles.alertSuccess}>✓ {message}</div>}
+        {error && <div style={styles.alertError}>✕ {error}</div>}
+
+        <div style={{ ...styles.card, padding: '1.5rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(212,163,97,0.15)', border: `1px solid rgba(212,163,97,0.3)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', color: colors.gold, fontWeight: 600 }}>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: colors.goldMuted, border: `1px solid ${colors.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', color: colors.gold, fontWeight: 600 }}>
               {userName.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -157,24 +148,21 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* Configuración de Email */}
-        <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: '16px', padding: '1.5rem' }}>
+        <div style={{ ...styles.card, padding: '1.5rem' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 600, color: colors.text, marginBottom: '0.5rem' }}>📧 Configuración de Email</h3>
           <p style={{ fontSize: '0.875rem', color: colors.textMuted, marginBottom: '1rem' }}>
             Necesitas un App Password para enviar invitaciones desde tu correo.
           </p>
 
-          {/* Estado actual */}
-          <div style={{ padding: '0.75rem', background: perfil?.email_app_password_configured ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)', borderRadius: '10px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ padding: '0.75rem', background: perfil?.email_app_password_configured ? colors.greenMuted : colors.amberMuted, borderRadius: '10px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.25rem' }}>{perfil?.email_app_password_configured ? '✓' : '⚠️'}</span>
-            <span style={{ fontSize: '0.875rem', color: perfil?.email_app_password_configured ? colors.success : colors.warning }}>
+            <span style={{ fontSize: '0.875rem', color: perfil?.email_app_password_configured ? colors.mint : colors.amber }}>
               {perfil?.email_app_password_configured ? 'App Password configurado' : 'App Password no configurado'}
             </span>
           </div>
 
-          {/* Input para App Password */}
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 600, color: colors.textMuted, marginBottom: '6px' }}>
+            <label style={styles.label}>
               App Password (16 caracteres)
             </label>
             <input
@@ -183,89 +171,26 @@ export default function Perfil() {
               onChange={e => setAppPassword(e.target.value)}
               placeholder="xxxx xxxx xxxx xxxx"
               maxLength={19}
-              style={{
-                width: '100%',
-                background: 'rgba(255,255,255,0.04)',
-                border: `1px solid ${colors.border}`,
-                borderRadius: '10px',
-                padding: '11px 14px',
-                color: colors.text,
-                fontSize: '14px',
-                outline: 'none',
-                boxSizing: 'border-box',
-                fontFamily: 'monospace',
-                letterSpacing: '0.1em',
-              }}
+              style={{ ...styles.input, fontFamily: 'monospace', letterSpacing: '0.1em' }}
             />
           </div>
 
-          {/* Instrucciones */}
-          <details style={{ marginBottom: '1rem', color: colors.textMuted, fontSize: '0.8125rem' }}>
-            <summary style={{ cursor: 'pointer', color: colors.gold }}>¿Cómo obtener el App Password?</summary>
-            <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', textAlign: 'left' }}>
-              <ol style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
-                <li>Ve a <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" style={{ color: colors.gold }}>myaccount.google.com/security</a></li>
-                <li>Activa "Verificación en 2 pasos" (si no está)</li>
-                <li>Busca "Contraseñas de aplicaciones"</li>
-                <li>Selecciona "Otro" y escribe "CertifyPro"</li>
-                <li>Copia el código de 16 caracteres que Google te da</li>
-              </ol>
-            </div>
-          </details>
-
-          {/* Mensajes */}
-          {message && (
-            <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.1)', borderRadius: '10px', color: colors.success, fontSize: '0.875rem', marginBottom: '1rem' }}>
-              {message}
-            </div>
-          )}
-          
-          {error && (
-            <div style={{ padding: '0.75rem', background: 'rgba(239,68,68,0.1)', borderRadius: '10px', color: colors.error, fontSize: '0.875rem', marginBottom: '1rem' }}>
-              ✕ {error}
-            </div>
-          )}
-
-          <button
-            onClick={handleSaveAppPassword}
-            disabled={saving || !appPassword.trim()}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: saving ? '#6b7280' : colors.gold,
-              color: '#0e0e0f',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              cursor: saving || !appPassword.trim() ? 'not-allowed' : 'pointer',
-              opacity: saving || !appPassword.trim() ? 0.6 : 1,
-              marginBottom: '0.5rem',
-            }}
-          >
-            {saving ? 'Guardando...' : 'Guardar App Password'}
-          </button>
-
-          {perfil?.email_app_password_configured && (
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={handleSaveAppPassword}
+              disabled={saving || !appPassword}
+              style={{ ...styles.btnPrimary, flex: 1 }}
+            >
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
             <button
               onClick={handleTestEmail}
-              disabled={saving}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                background: 'rgba(59,130,246,0.1)',
-                color: '#60a5fa',
-                border: '1px solid rgba(59,130,246,0.2)',
-                borderRadius: '10px',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: saving ? 'not-allowed' : 'pointer',
-                opacity: saving ? 0.6 : 1,
-              }}
+              disabled={saving || !perfil?.email_app_password_configured}
+              style={{ ...styles.btnGhost, padding: '0 1.25rem' }}
             >
-              {saving ? 'Enviando...' : '📧 Enviar email de prueba'}
+              Probar
             </button>
-          )}
+          </div>
         </div>
       </div>
     </div>

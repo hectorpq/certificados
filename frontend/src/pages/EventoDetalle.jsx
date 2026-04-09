@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
+import { colors, styles } from '../theme'
 
 const LIMIT_CERTS = 30
 const STORAGE_KEY_CERTS = 'generar_simple_count'
@@ -10,8 +11,8 @@ const STORAGE_KEY_INVITATIONS = 'invitaciones_count'
 
 function LoadingSpinner() {
   return (
-    <div style={{ minHeight: '100vh', background: '#0e0e0f', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
-      <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#d4a361', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+    <div style={{ minHeight: '100vh', background: colors.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: colors.gold, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <span style={{ color: 'rgba(240,237,232,0.6)' }}>Cargando...</span>
     </div>
@@ -20,13 +21,13 @@ function LoadingSpinner() {
 
 function Header({ isLoggedIn, userName, onLogout, onLogin }) {
   return (
-    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#18181a', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: colors.surface, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
         <div style={{ width: '2.5rem', height: '2.5rem', background: 'rgba(212,163,97,0.15)', border: '1px solid rgba(212,163,97,0.3)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontSize: '1.25rem' }}>🎓</span>
         </div>
-        <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '1rem', color: '#f0ede8', margin: 0 }}>
-          Certify<em style={{ fontStyle: 'italic', color: '#d4a361' }}>Pro</em>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '1rem', color: colors.text, margin: 0 }}>
+          Certify<em style={{ fontStyle: 'italic', color: colors.gold }}>Pro</em>
         </p>
       </Link>
       {isLoggedIn ? (
@@ -37,7 +38,7 @@ function Header({ isLoggedIn, userName, onLogout, onLogin }) {
           </button>
         </div>
       ) : (
-        <button onClick={onLogin} style={{ padding: '0.6rem 1.25rem', background: '#d4a361', color: '#0e0e0f', border: 'none', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}>
+        <button onClick={onLogin} style={{ padding: '0.6rem 1.25rem', background: colors.gold, color: colors.bg, border: 'none', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}>
           Iniciar Sesión
         </button>
       )}
@@ -48,7 +49,7 @@ function Header({ isLoggedIn, userName, onLogout, onLogin }) {
 function Modal({ children, onClose }) {
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
-      <div style={{ textAlign: 'center', background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '2.5rem', maxWidth: '450px', position: 'relative', width: '100%' }}>
+      <div style={{ textAlign: 'center', background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '2.5rem', maxWidth: '450px', position: 'relative', width: '100%' }}>
         <button onClick={onClose} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', color: 'rgba(240,237,232,0.4)', fontSize: '1.25rem', cursor: 'pointer', padding: '0.5rem' }}>✕</button>
         {children}
       </div>
@@ -532,7 +533,7 @@ export default function EventoDetalle() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0e0e0f' }}>
+      <div style={{ minHeight: '100vh', background: colors.bg }}>
         <Header isLoggedIn={isLoggedIn} userName={userName} onLogout={handleLogout} onLogin={() => navigate('/login')} />
         <LoadingSpinner />
       </div>
@@ -541,18 +542,18 @@ export default function EventoDetalle() {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0e0e0f' }}>
+      <div style={{ minHeight: '100vh', background: colors.bg }}>
         <Header isLoggedIn={isLoggedIn} userName={userName} onLogout={handleLogout} onLogin={() => navigate('/login')} />
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '2rem' }}>
           <div style={{ textAlign: 'center', maxWidth: '400px' }}>
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>❌</div>
-            <h2 style={{ color: '#f0ede8', marginBottom: '0.5rem' }}>{error}</h2>
+            <h2 style={{ color: colors.text, marginBottom: '0.5rem' }}>{error}</h2>
             <p style={{ color: 'rgba(240,237,232,0.5)', marginBottom: '1.5rem' }}>El evento puede que no exista o hay un problema de conexión.</p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => window.location.reload()} style={{ padding: '0.75rem 1.5rem', background: '#d4a361', color: '#0e0e0f', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+              <button onClick={() => window.location.reload()} style={{ padding: '0.75rem 1.5rem', background: colors.gold, color: colors.bg, border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
                 Reintentar
               </button>
-              <Link to="/" style={{ padding: '0.75rem 1.5rem', background: 'transparent', color: '#d4a361', border: '1px solid #d4a361', borderRadius: '10px', textDecoration: 'none' }}>
+              <Link to="/" style={{ padding: '0.75rem 1.5rem', background: 'transparent', color: colors.gold, border: '1px solid #d4a361', borderRadius: '10px', textDecoration: 'none' }}>
                 Volver al inicio
               </Link>
             </div>
@@ -563,16 +564,16 @@ export default function EventoDetalle() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0e0e0f' }}>
+    <div style={{ minHeight: '100vh', background: colors.bg }}>
       <Header isLoggedIn={isLoggedIn} userName={userName} onLogout={handleLogout} onLogin={() => navigate('/login')} />
 
       {/* Modal de límite */}
       {showLimitModal && (
         <Modal onClose={() => setShowLimitModal(false)}>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔒</div>
-          <h2 style={{ color: '#f0ede8', fontSize: '1.25rem', marginBottom: '0.75rem' }}>Límite alcanzado</h2>
+          <h2 style={{ color: colors.text, fontSize: '1.25rem', marginBottom: '0.75rem' }}>Límite alcanzado</h2>
           <p style={{ color: 'rgba(240,237,232,0.5)', marginBottom: '1.5rem' }}>{limitMessage}</p>
-          <button onClick={() => navigate('/login')} style={{ width: '100%', padding: '0.9rem', background: '#d4a361', color: '#0e0e0f', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}>
+          <button onClick={() => navigate('/login')} style={{ width: '100%', padding: '0.9rem', background: colors.gold, color: colors.bg, border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}>
             Iniciar Sesión
           </button>
         </Modal>
@@ -584,7 +585,7 @@ export default function EventoDetalle() {
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
           <h2 style={{ color: '#22c55e', fontSize: '1.25rem', marginBottom: '0.75rem' }}>¡Certificados generados!</h2>
           <p style={{ color: 'rgba(240,237,232,0.5)', marginBottom: '1.5rem' }}>{successMessage}</p>
-          <button onClick={() => setShowSuccessModal(false)} style={{ padding: '0.75rem 1.5rem', background: '#d4a361', color: '#0e0e0f', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+          <button onClick={() => setShowSuccessModal(false)} style={{ padding: '0.75rem 1.5rem', background: colors.gold, color: colors.bg, border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
             Continuar
           </button>
         </Modal>
@@ -601,7 +602,7 @@ export default function EventoDetalle() {
           <div style={{ display: 'flex', gap: '1rem' }}>
             <button 
               onClick={() => setShowDeleteModal(false)} 
-              style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: '#f0ede8', cursor: 'pointer', fontWeight: 600 }}
+              style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: colors.text, cursor: 'pointer', fontWeight: 600 }}
             >
               Cancelar
             </button>
@@ -627,14 +628,14 @@ export default function EventoDetalle() {
           <div style={{ display: 'flex', gap: '1rem' }}>
             <button 
               onClick={() => setShowClearModal(false)} 
-              style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: '#f0ede8', cursor: 'pointer', fontWeight: 600 }}
+              style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: colors.text, cursor: 'pointer', fontWeight: 600 }}
             >
               Cancelar
             </button>
             <button 
               onClick={handleClearInvitations} 
               disabled={clearing}
-              style={{ flex: 1, padding: '0.75rem', background: clearing ? '#6b7280' : '#f59e0b', border: 'none', borderRadius: '10px', color: '#0e0e0f', cursor: 'pointer', fontWeight: 600, opacity: clearing ? 0.6 : 1 }}
+              style={{ flex: 1, padding: '0.75rem', background: clearing ? '#6b7280' : '#f59e0b', border: 'none', borderRadius: '10px', color: colors.bg, cursor: 'pointer', fontWeight: 600, opacity: clearing ? 0.6 : 1 }}
             >
               {clearing ? 'Limpiando...' : 'Sí, limpiar'}
             </button>
@@ -651,7 +652,7 @@ export default function EventoDetalle() {
         {/* Info del evento */}
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f0ede8', margin: 0 }}>{event?.name || 'Evento'}</h1>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: colors.text, margin: 0 }}>{event?.name || 'Evento'}</h1>
             {isLoggedIn && (
               <button 
                 onClick={() => setShowDeleteModal(true)}
@@ -686,7 +687,7 @@ export default function EventoDetalle() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{ width: '80px', height: '4px', background: 'rgba(255,255,255,0.07)', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div style={{ width: `${(countCerts / LIMIT_CERTS) * 100}%`, height: '100%', background: '#d4a361', transition: 'width 0.3s' }} />
+                  <div style={{ width: `${(countCerts / LIMIT_CERTS) * 100}%`, height: '100%', background: colors.gold, transition: 'width 0.3s' }} />
                 </div>
                 <span style={{ fontSize: '0.7rem', color: 'rgba(240,237,232,0.4)' }}>{remainingCerts} certificados</span>
               </div>
@@ -716,7 +717,7 @@ export default function EventoDetalle() {
                 marginTop: '0.75rem',
                 padding: '0.5rem 1rem',
                 background: '#f59e0b',
-                color: '#0e0e0f',
+                color: colors.bg,
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '0.8125rem',
@@ -731,10 +732,10 @@ export default function EventoDetalle() {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <button onClick={() => setTab('invitations')} style={{ padding: '0.75rem 1rem', background: 'transparent', border: 'none', borderBottom: tab === 'invitations' ? '2px solid #d4a361' : '2px solid transparent', color: tab === 'invitations' ? '#f0ede8' : 'rgba(240,237,232,0.4)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+          <button onClick={() => setTab('invitations')} style={{ padding: '0.75rem 1rem', background: 'transparent', border: 'none', borderBottom: tab === 'invitations' ? '2px solid #d4a361' : '2px solid transparent', color: tab === 'invitations' ? colors.text : 'rgba(240,237,232,0.4)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
             📧 Invitaciones
           </button>
-          <button onClick={() => setTab('certificates')} style={{ padding: '0.75rem 1rem', background: 'transparent', border: 'none', borderBottom: tab === 'certificates' ? '2px solid #d4a361' : '2px solid transparent', color: tab === 'certificates' ? '#f0ede8' : 'rgba(240,237,232,0.4)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+          <button onClick={() => setTab('certificates')} style={{ padding: '0.75rem 1rem', background: 'transparent', border: 'none', borderBottom: tab === 'certificates' ? '2px solid #d4a361' : '2px solid transparent', color: tab === 'certificates' ? colors.text : 'rgba(240,237,232,0.4)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
             📜 Generar Certificados
           </button>
         </div>
@@ -743,7 +744,7 @@ export default function EventoDetalle() {
         {tab === 'invitations' && (
           <div>
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', cursor: 'pointer', fontSize: '0.875rem', color: '#f0ede8' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', cursor: 'pointer', fontSize: '0.875rem', color: colors.text }}>
                 📊 Subir Excel
                 <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleUploadExcel} />
               </label>
@@ -759,7 +760,7 @@ export default function EventoDetalle() {
 
             {/* Botón limpiar + stats */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#f0ede8', margin: 0 }}>📊 Resumen</h3>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: colors.text, margin: 0 }}>📊 Resumen</h3>
               {invitations.length > 0 && (
                 <button 
                   onClick={() => setShowClearModal(true)}
@@ -779,32 +780,32 @@ export default function EventoDetalle() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f0ede8' }}>{stats.total || 0}</div>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: colors.text }}>{stats.total || 0}</div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.4)' }}>Total</div>
               </div>
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#22c55e' }}>{stats.accepted || 0}</div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.4)' }}>Aceptados</div>
               </div>
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b' }}>{stats.pending || 0}</div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.4)' }}>Pendientes</div>
               </div>
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>{stats.declined || 0}</div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.4)' }}>Rechazados</div>
               </div>
             </div>
 
             {invitations.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', background: '#18181a', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ textAlign: 'center', padding: '3rem', background: colors.surface, borderRadius: '16px', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
                 <p style={{ color: 'rgba(240,237,232,0.4)', margin: 0 }}>No hay invitaciones</p>
                 <p style={{ color: 'rgba(240,237,232,0.3)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Sube un Excel para invitar estudiantes</p>
               </div>
             ) : (
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', overflow: 'hidden' }}>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
@@ -822,7 +823,7 @@ export default function EventoDetalle() {
                             {getStatusIcon(inv.status)} {inv.status_display}
                           </span>
                         </td>
-                        <td style={{ padding: '1rem', color: '#f0ede8', fontSize: '0.875rem' }}>{inv.student_name}</td>
+                        <td style={{ padding: '1rem', color: colors.text, fontSize: '0.875rem' }}>{inv.student_name}</td>
                         <td style={{ padding: '1rem', color: 'rgba(240,237,232,0.5)', fontSize: '0.875rem' }}>{inv.student_email}</td>
                         <td style={{ padding: '1rem', color: 'rgba(240,237,232,0.5)', fontSize: '0.875rem' }}>{inv.sent_via_display || '-'}</td>
                       </tr>
@@ -838,8 +839,8 @@ export default function EventoDetalle() {
         {tab === 'certificates' && (
           <div>
             {/* 1. Subir imagen de plantilla */}
-            <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#f0ede8', marginBottom: '1rem' }}>📷 Plantilla del Certificado</h3>
+            <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: colors.text, marginBottom: '1rem' }}>📷 Plantilla del Certificado</h3>
               
               <label style={{ 
                 display: 'block', 
@@ -858,7 +859,7 @@ export default function EventoDetalle() {
                   onChange={handleTemplateUpload} 
                 />
                 <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📁</div>
-                <p style={{ color: '#f0ede8', margin: 0 }}>Subir imagen (JPG o PNG)</p>
+                <p style={{ color: colors.text, margin: 0 }}>Subir imagen (JPG o PNG)</p>
                 <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: '0.75rem', marginTop: '0.5rem' }}>Tamaño recomendado: 1200x800px</p>
               </label>
               
@@ -869,8 +870,8 @@ export default function EventoDetalle() {
 
             {/* 2. Vista previa con drag & drop */}
             {templatePreview && (
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#f0ede8', marginBottom: '1rem' }}>🎯 Vista Previa - Arrastra el nombre</h3>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: colors.text, marginBottom: '1rem' }}>🎯 Vista Previa - Arrastra el nombre</h3>
                 
                 {/* Preview del nombre */}
                 <div style={{ marginBottom: '0.75rem' }}>
@@ -886,7 +887,7 @@ export default function EventoDetalle() {
                       border: '1px solid rgba(255,255,255,0.1)',
                       borderRadius: '8px',
                       padding: '8px 12px',
-                      color: '#f0ede8',
+                      color: colors.text,
                       fontSize: '0.875rem',
                       boxSizing: 'border-box'
                     }}
@@ -951,12 +952,12 @@ export default function EventoDetalle() {
                     <span style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.5)' }}>Tamaño:</span>
                     <button 
                       onClick={() => setFontSize(Math.max(10, fontSize - 2))}
-                      style={{ width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '6px', color: '#f0ede8', cursor: 'pointer' }}
+                      style={{ width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '6px', color: colors.text, cursor: 'pointer' }}
                     >-</button>
-                    <span style={{ color: '#f0ede8', minWidth: '40px', textAlign: 'center' }}>{fontSize}px</span>
+                    <span style={{ color: colors.text, minWidth: '40px', textAlign: 'center' }}>{fontSize}px</span>
                     <button 
                       onClick={() => setFontSize(Math.min(72, fontSize + 2))}
-                      style={{ width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '6px', color: '#f0ede8', cursor: 'pointer' }}
+                      style={{ width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '6px', color: colors.text, cursor: 'pointer' }}
                     >+</button>
                   </div>
                   
@@ -989,7 +990,7 @@ export default function EventoDetalle() {
             <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '1.25rem' }}>ℹ️</span>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#f0ede8', margin: 0 }}>¿Cómo funciona?</h3>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: colors.text, margin: 0 }}>¿Cómo funciona?</h3>
               </div>
               <p style={{ fontSize: '0.875rem', color: 'rgba(240,237,232,0.7)', margin: 0, lineHeight: 1.6 }}>
                 Los certificados se crean <strong style={{ color: '#60a5fa' }}>automáticamente</strong> cuando un invitado acepta la invitación. 
@@ -999,23 +1000,23 @@ export default function EventoDetalle() {
 
             {/* Stats y generar */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f0ede8' }}>{certStats.total || 0}</div>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: colors.text }}>{certStats.total || 0}</div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.4)' }}>Total</div>
               </div>
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b' }}>{certStats.pending || 0}</div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.4)' }}>Pendiente</div>
               </div>
-              <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#22c55e' }}>{certStats.generated || 0}</div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.4)' }}>Generado</div>
               </div>
             </div>
 
             {/* 5. Generar certificados */}
-            <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#f0ede8', marginBottom: '0.5rem' }}>📋 Generar Certificados</h3>
+            <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: colors.text, marginBottom: '0.5rem' }}>📋 Generar Certificados</h3>
               <p style={{ fontSize: '0.875rem', color: 'rgba(240,237,232,0.4)', marginBottom: '1rem' }}>
                 Crea los PDFs con la plantilla subida
               </p>
@@ -1039,8 +1040,8 @@ export default function EventoDetalle() {
             </div>
 
             {/* 6. Enviar certificados */}
-            <div style={{ background: '#18181a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#f0ede8', marginBottom: '0.5rem' }}>✈️ Enviar Certificados por Email</h3>
+            <div style={{ background: colors.surface, border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: colors.text, marginBottom: '0.5rem' }}>✈️ Enviar Certificados por Email</h3>
               <p style={{ fontSize: '0.875rem', color: 'rgba(240,237,232,0.4)', marginBottom: '1rem' }}>
                 {certStats.generated || 0} certificado(s) listo(s) para enviar con PDF adjunto
               </p>
