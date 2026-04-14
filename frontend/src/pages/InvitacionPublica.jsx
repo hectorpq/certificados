@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import api from '../api/axios'
-import { colors, styles } from '../theme'
+import { colors, styles } from '../styles'
 
 function Header() {
   return (

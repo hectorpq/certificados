@@ -9,7 +9,7 @@ import Certificados from './pages/Certificados'
 import InvitacionPublica from './pages/InvitacionPublica'
 import GenerarSimple from './pages/GenerarSimple'
 import Perfil from './pages/Perfil'
-import { globalCSS } from './theme'
+import { globalCSS } from './styles'
 
 export default function App() {
   useEffect(() => {

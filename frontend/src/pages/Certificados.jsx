@@ -1,7 +1,7 @@
 // src/pages/Certificados.jsx
 import { useState, useEffect } from 'react'
 import api from '../api/axios'
-import { colors, styles, statusConfig } from '../theme'
+import { colors, styles, statusConfig } from '../styles'
 
 export default function Certificados() {
   const [eventos,       setEventos]       = useState([])

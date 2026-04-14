@@ -2,14 +2,13 @@
 import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import api from '../api/axios'
-import { colors, styles } from '../theme'
+import { colors, backgrounds, buttons, cards, typography, radius } from '../styles'
 
 export default function Login() {
   const navigate = useNavigate()
 
   const handleSuccess = async (credentialResponse) => {
     try {
-      // Enviar token al backend para validar y crear usuario
       const res = await api.post('/auth/google/', {
         credential: credentialResponse.credential
       })
@@ -17,7 +16,6 @@ export default function Login() {
       if (res.data.success) {
         const { user, token } = res.data
         
-        // Guardar datos del usuario
         localStorage.setItem('token', token)
         localStorage.setItem('user_id', user.id || '')
         localStorage.setItem('user_name', user.full_name || '')
@@ -26,7 +24,6 @@ export default function Login() {
         localStorage.setItem('is_admin', user.is_admin ? 'true' : 'false')
         localStorage.setItem('admin_mode', user.is_admin_mode ? 'true' : 'false')
         
-        console.log('Login exitoso:', user.email)
         navigate('/')
       }
     } catch (error) {
@@ -42,69 +39,150 @@ export default function Login() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '1.5rem',
       position: 'relative',
       overflow: 'hidden',
+      fontFamily: "'DM Sans', sans-serif",
     }}>
-      {/* Grid texture */}
+      {/* Background Effects */}
       <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none',
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
-        backgroundSize: '60px 60px',
+        position: 'fixed',
+        inset: 0,
+        pointerEvents: 'none',
+        ...backgrounds.grid,
       }} />
-      {/* Glow top */}
+      
+      {/* Gold Glow Top */}
       <div style={{
-        position: 'fixed', top: '-8rem', left: '50%', transform: 'translateX(-50%)',
-        width: '600px', height: '300px', pointerEvents: 'none',
-        background: 'radial-gradient(ellipse, rgba(212,163,97,0.12) 0%, transparent 70%)',
+        position: 'fixed',
+        top: '-150px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        ...backgrounds.glowGold('800px'),
+        animation: 'float 8s ease-in-out infinite',
       }} />
-      {/* Glow bottom-left */}
+      
+      {/* Mint Glow Bottom Left */}
       <div style={{
-        position: 'fixed', bottom: '-6rem', left: '-4rem',
-        width: '320px', height: '320px', pointerEvents: 'none',
-        background: 'radial-gradient(circle, rgba(110,231,183,0.05) 0%, transparent 65%)',
+        position: 'fixed',
+        bottom: '-100px',
+        left: '-80px',
+        ...backgrounds.glowMint('400px'),
+        animation: 'float 10s ease-in-out infinite reverse',
+      }} />
+      
+      {/* Purple Glow Bottom Right */}
+      <div style={{
+        position: 'fixed',
+        bottom: '-50px',
+        right: '-50px',
+        ...backgrounds.glowPurple('300px'),
+        animation: 'float 12s ease-in-out infinite',
       }} />
 
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '400px' }}>
-        <div className="cp-card" style={{ ...styles.card, padding: '2.5rem 2rem' }}>
+      <div style={{ 
+        position: 'relative', 
+        zIndex: 1, 
+        width: '100%', 
+        maxWidth: '440px',
+        padding: '1rem',
+        animation: 'slideUp 0.6s ease',
+      }}>
+        <div style={{
+          ...cards.container,
+          padding: '3rem 2.5rem',
+          position: 'relative',
+          overflow: 'visible',
+        }}>
+          {/* Decorative corner glow */}
+          <div style={{
+            position: 'absolute',
+            top: '-1px',
+            right: '-1px',
+            width: '100px',
+            height: '100px',
+            background: `radial-gradient(circle, ${colors.goldMuted} 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
 
-          {/* Brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '.85rem', marginBottom: '2rem' }}>
+          {/* Logo */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '1rem', 
+            marginBottom: '2.5rem',
+            justifyContent: 'center',
+            flexDirection: 'column',
+          }}>
             <div style={{
-              width: '2.5rem', height: '2.5rem',
-              border: `1px solid ${colors.goldBorder}`,
-              borderRadius: '12px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: colors.goldMuted, flexShrink: 0,
+              width: '70px',
+              height: '70px',
+              borderRadius: '20px',
+              background: `linear-gradient(135deg, ${colors.gold} 0%, #b8860b 100%)`,
+              border: `2px solid ${colors.goldBorder}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: `0 8px 32px ${colors.goldMuted}`,
+              animation: 'glow 3s ease-in-out infinite',
             }}>
-              <svg width="18" height="18" fill="none" stroke={colors.gold} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              <svg width="32" height="32" fill="none" stroke={colors.bg} strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" 
                   d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
               </svg>
             </div>
-            <div>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '15px', color: colors.text, margin: '0 0 2px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ 
+                fontFamily: "'Playfair Display', serif", 
+                fontWeight: 900, 
+                fontSize: '1.75rem', 
+                color: colors.text, 
+                margin: '0 0 0.25rem' 
+              }}>
                 Certify<em style={{ fontStyle: 'italic', color: colors.gold }}>Pro</em>
               </p>
-              <p style={{ fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', color: colors.textDim, margin: 0 }}>
+              <p style={{ 
+                fontSize: '11px', 
+                letterSpacing: '.15em', 
+                textTransform: 'uppercase', 
+                color: colors.textDim, 
+                margin: 0 
+              }}>
                 Sistema de certificación
               </p>
             </div>
           </div>
 
           {/* Heading */}
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', fontWeight: 900, color: colors.text, margin: '0 0 .3rem' }}>
-            Bienvenido
-          </h1>
-          <p style={{ fontSize: '.82rem', color: colors.textMuted, margin: '0 0 2rem', fontWeight: 300 }}>
-            Inicia sesión con tu cuenta Google para continuar
-          </p>
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <h1 style={{ 
+              ...typography.h2,
+              fontSize: '1.75rem',
+              marginBottom: '0.5rem',
+            }}>
+              Bienvenido
+            </h1>
+            <p style={{ 
+              fontSize: '0.9rem', 
+              color: colors.textMuted, 
+              margin: 0 
+            }}>
+              Inicia sesión para continuar
+            </p>
+          </div>
 
           {/* Divider */}
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)', margin: '0 0 1.75rem' }} />
+          <div style={{ 
+            height: '1px', 
+            background: `linear-gradient(90deg, transparent, ${colors.border}, transparent)`, 
+            marginBottom: '2rem' 
+          }} />
 
-          {/* Google button */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.75rem' }}>
+          {/* Google Button */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            marginBottom: '2rem',
+          }}>
             <GoogleLogin
               onSuccess={handleSuccess}
               onError={() => console.log('Error al iniciar sesión')}
@@ -113,36 +191,86 @@ export default function Login() {
               shape="rectangular"
               text="signin_with"
               locale="es"
+              width="280px"
             />
           </div>
 
-          {/* Divider label */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', marginBottom: '1.25rem' }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
-            <span style={{ fontSize: '11px', color: colors.textDim, letterSpacing: '.06em' }}>acceso seguro</span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+          {/* Features */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr 1fr', 
+            gap: '0.5rem',
+            marginBottom: '2rem',
+          }}>
+            {[
+              { icon: '🔒', text: 'Seguro' },
+              { icon: '⚡', text: 'Rápido' },
+              { icon: '🎓', text: 'Profesional' },
+            ].map((item, i) => (
+              <div key={i} style={{
+                textAlign: 'center',
+                padding: '0.75rem 0.5rem',
+                background: 'rgba(255,255,255,0.02)',
+                borderRadius: radius.md,
+                border: `1px solid ${colors.border}`,
+              }}>
+                <div style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>{item.icon}</div>
+                <div style={{ fontSize: '11px', color: colors.textMuted, letterSpacing: '0.05em' }}>
+                  {item.text}
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Status pill */}
+          {/* Divider label */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '1rem', 
+            marginBottom: '1.5rem' 
+          }}>
+            <div style={{ flex: 1, height: '1px', background: colors.border }} />
+            <span style={{ fontSize: '10px', color: colors.textDim, letterSpacing: '.1em' }}>
+              ACCESO SEGURO
+            </span>
+            <div style={{ flex: 1, height: '1px', background: colors.border }} />
+          </div>
+
+          {/* Status */}
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '.45rem',
-              background: 'rgba(255,255,255,0.03)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: 'rgba(255,255,255,0.02)',
               border: `1px solid ${colors.border}`,
-              borderRadius: '999px', padding: '.3rem .85rem',
-              fontSize: '11px', color: colors.textDim, letterSpacing: '.04em',
+              borderRadius: radius.full,
+              padding: '0.4rem 1rem',
+              fontSize: '11px',
+              color: colors.textDim,
             }}>
               <span style={{
-                width: '6px', height: '6px', borderRadius: '50%',
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
                 background: colors.mint,
-                boxShadow: '0 0 6px rgba(110,231,183,0.7)',
-                flexShrink: 0, display: 'inline-block',
+                boxShadow: `0 0 8px ${colors.mint}`,
+                animation: 'pulse 2s infinite',
               }} />
-              Servidor activo en localhost:8000
+              Servidor activo
             </div>
           </div>
-
         </div>
+
+        {/* Footer */}
+        <p style={{
+          textAlign: 'center',
+          fontSize: '11px',
+          color: colors.textDim,
+          marginTop: '1.5rem',
+        }}>
+          © 2026 CertifyPro. Todos los derechos reservados.
+        </p>
       </div>
     </div>
   )

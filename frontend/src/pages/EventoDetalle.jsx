@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { colors, styles } from '../theme'
+import { colors, styles } from '../styles'
 
 const LIMIT_CERTS = 30
 const STORAGE_KEY_CERTS = 'generar_simple_count'

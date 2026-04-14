@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import api from '../api/axios'
-import { colors, styles, sectionStyles } from '../styles/theme'
+import { colors, styles, sectionStyles } from '../styles'
 
 export default function GeneradorCertificados() {
   const [loading, setLoading] = useState(false)

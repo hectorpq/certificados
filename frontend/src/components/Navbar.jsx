@@ -2,7 +2,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import api from '../api/axios'
-import { colors, styles } from '../theme'
+import { colors, backgrounds, animations, buttons, radius } from '../styles'
 
 export default function Navbar() {
   const navigate     = useNavigate()
@@ -43,68 +43,85 @@ export default function Navbar() {
   }, [isLoggedIn])
 
   const links = [
-    { to: '/generar',      label: '🎓 Generar'     },
-    { to: '/eventos',      label: '📅 Eventos'     },
-    { to: '/certificados', label: '📜 Certificados'},
+    { to: '/generar',      label: 'Generar',     icon: '🎓' },
+    { to: '/eventos',      label: 'Eventos',     icon: '📅' },
+    { to: '/certificados', label: 'Certificados', icon: '📜' },
   ]
 
   return (
     <nav style={{
-      background: colors.surface,
+      background: `linear-gradient(180deg, ${colors.surface} 0%, rgba(24,24,26,0.95) 100%)`,
       borderBottom: `1px solid ${colors.border}`,
       padding: '0 2rem',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      height: '56px',
+      height: '64px',
       position: 'sticky',
       top: 0,
       zIndex: 50,
+      backdropFilter: 'blur(10px)',
     }}>
-
       {/* Left: brand + links */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
         {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '.75rem', textDecoration: 'none' }}>
           <div style={{
-            width: '28px', height: '28px',
+            width: '36px', height: '36px',
             border: `1px solid ${colors.goldBorder}`,
-            borderRadius: '8px',
+            borderRadius: '10px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: colors.goldMuted,
+            background: `linear-gradient(135deg, ${colors.goldMuted} 0%, ${colors.gold} 100%)`,
+            boxShadow: `0 2px 12px ${colors.goldMuted}`,
           }}>
-            <svg width="14" height="14" fill="none" stroke={colors.gold} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+            <svg width="18" height="18" fill="none" stroke={colors.bg} strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" 
                 d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
             </svg>
           </div>
           <span style={{
             fontFamily: "'Playfair Display', serif",
-            fontWeight: 700, fontSize: '15px',
-            color: colors.text, letterSpacing: '-.01em',
+            fontWeight: 800, fontSize: '1.1rem',
+            color: colors.text, letterSpacing: '-0.02em',
           }}>
             Certify<em style={{ fontStyle: 'italic', color: colors.gold }}>Pro</em>
           </span>
-        </div>
+        </Link>
 
         {/* Nav links */}
-        <div style={{ display: 'flex', gap: '2px' }}>
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
           {links.map(l => {
             const active = location.pathname === l.to
             return (
               <Link key={l.to} to={l.to} style={{
-                padding: '.4rem .85rem',
-                borderRadius: '8px',
+                padding: '0.5rem 1rem',
+                borderRadius: radius.md,
                 fontSize: '13px',
                 fontFamily: "'DM Sans', sans-serif",
-                fontWeight: active ? 600 : 400,
-                color: active ? colors.text : colors.textMuted,
+                fontWeight: active ? 600 : 500,
+                color: active ? colors.gold : colors.textMuted,
                 background: active ? colors.goldMuted : 'transparent',
                 border: active ? `1px solid ${colors.goldBorder}` : '1px solid transparent',
                 textDecoration: 'none',
-                transition: 'all .15s',
-              }}>
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+              onMouseOver={e => {
+                if (!active) {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                  e.currentTarget.style.color = colors.text
+                }
+              }}
+              onMouseOut={e => {
+                if (!active) {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = colors.textMuted
+                }
+              }}
+              >
+                <span style={{ fontSize: '14px' }}>{l.icon}</span>
                 {l.label}
               </Link>
             )
@@ -112,29 +129,38 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Right: user info + logout */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
-
+      {/* Right: user info + controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {/* Admin Mode Toggle */}
         {isAdmin && (
           <button
             onClick={toggleAdminMode}
             disabled={toggling}
             style={{
-              padding: '.3rem .7rem',
-              borderRadius: '6px',
-              fontSize: '11px',
+              padding: '0.4rem 0.85rem',
+              borderRadius: radius.md,
+              fontSize: '12px',
               fontWeight: 600,
+              fontFamily: "'DM Sans', sans-serif",
               border: `1px solid ${adminMode ? colors.mintBorder : colors.border}`,
-              background: adminMode ? colors.mintMuted : 'transparent',
+              background: adminMode ? colors.mintMuted : 'rgba(255,255,255,0.03)',
               color: adminMode ? colors.mint : colors.textMuted,
               cursor: isAdmin ? 'pointer' : 'not-allowed',
               opacity: toggling ? 0.6 : 1,
-              transition: 'all .2s',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
             }}
-            title={adminMode ? 'Modo Admin ACTIVADO' : 'Modo Admin desactivado'}
+            title={adminMode ? 'Modo Admin ACTIVADO' : 'Activar modo admin'}
           >
-            {adminMode ? '✓ Admin' : 'Admin'}
+            <span style={{ 
+              width: '6px', 
+              height: '6px', 
+              borderRadius: '50%', 
+              background: adminMode ? colors.mint : colors.textDim 
+            }} />
+            {adminMode ? 'Admin' : 'Admin'}
           </button>
         )}
 
@@ -147,53 +173,99 @@ export default function Navbar() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
-              borderRadius: '6px',
+              width: '32px',
+              height: '32px',
+              borderRadius: radius.md,
               fontSize: '14px',
-              background: appPasswordConfigured === null ? 'transparent' : appPasswordConfigured ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
-              border: `1px solid ${appPasswordConfigured === null ? colors.border : appPasswordConfigured ? 'rgba(34,197,94,0.3)' : 'rgba(245,158,11,0.3)'}`,
+              background: appPasswordConfigured === null ? 'rgba(255,255,255,0.03)' : 
+                appPasswordConfigured ? colors.greenMuted : colors.amberMuted,
+              border: `1px solid ${appPasswordConfigured === null ? colors.border : 
+                appPasswordConfigured ? colors.greenBorder : 'rgba(245,158,11,0.3)'}`,
               textDecoration: 'none',
+              transition: 'all 0.2s ease',
             }}
           >
             {appPasswordConfigured === null ? '⚙️' : appPasswordConfigured ? '✓' : '⚠️'}
           </Link>
         )}
 
-        {/* Avatar */}
-        {userPicture ? (
-          <img
-            src={userPicture}
-            alt={userName}
-            style={{
-              width: '30px', height: '30px',
-              borderRadius: '50%', objectFit: 'cover',
-              border: `1px solid ${colors.goldBorder}`,
-            }}
-          />
-        ) : (
+        {/* User section */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '0.75rem',
+          padding: '0.35rem 0.75rem',
+          background: 'rgba(255,255,255,0.02)',
+          borderRadius: radius.md,
+          border: `1px solid ${colors.border}`,
+        }}>
+          {/* Avatar */}
           <div style={{
-            width: '30px', height: '30px', borderRadius: '50%',
-            background: colors.goldMuted, border: `1px solid ${colors.goldBorder}`,
+            width: '32px', height: '32px', 
+            borderRadius: '50%',
+            background: `linear-gradient(135deg, ${colors.gold} 0%, #b8860b 100%)`,
+            border: `2px solid ${colors.goldBorder}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '12px', color: colors.gold, fontWeight: 600,
+            fontSize: '13px', 
+            fontWeight: 700,
+            color: colors.bg,
+            boxShadow: `0 2px 8px ${colors.goldMuted}`,
           }}>
             {userName.charAt(0).toUpperCase()}
           </div>
-        )}
 
-        {/* Name */}
-        <span style={{ fontSize: '13px', color: colors.textMuted, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {userName}
-        </span>
+          {/* Name */}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ 
+              fontSize: '13px', 
+              color: colors.text, 
+              fontWeight: 600,
+              maxWidth: '120px', 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              whiteSpace: 'nowrap',
+            }}>
+              {userName}
+            </span>
+            <span style={{ 
+              fontSize: '10px', 
+              color: colors.textDim, 
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}>
+              {isAdmin ? 'Admin' : 'Usuario'}
+            </span>
+          </div>
 
-        {/* Divider */}
-        <div style={{ width: '1px', height: '18px', background: colors.border }} />
+          {/* Divider */}
+          <div style={{ width: '1px', height: '24px', background: colors.border, margin: '0 0.25rem' }} />
 
-        {/* Logout */}
-        <button onClick={logout} className="cp-btn-ghost" style={styles.btnGhost}>
-          Salir
-        </button>
+          {/* Logout */}
+          <button 
+            onClick={logout} 
+            style={{
+              padding: '0.4rem 0.75rem',
+              background: 'transparent',
+              border: 'none',
+              color: colors.textMuted,
+              fontSize: '12px',
+              fontFamily: "'DM Sans', sans-serif",
+              cursor: 'pointer',
+              borderRadius: radius.sm,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={e => {
+              e.currentTarget.style.color = colors.red
+              e.currentTarget.style.background = colors.redMuted
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.color = colors.textMuted
+              e.currentTarget.style.background = 'transparent'
+            }}
+          >
+            Salir
+          </button>
+        </div>
       </div>
     </nav>
   )

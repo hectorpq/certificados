@@ -1,7 +1,7 @@
 // src/pages/GenerarSimple.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { colors, styles } from '../theme'
+import { colors, styles } from '../styles'
 
 const LIMIT = 30
 const STORAGE_KEY = 'generar_simple_count'
