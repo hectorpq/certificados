@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { colors, backgrounds, buttons, cards, inputs, alerts, radius, layout, typography, badges, statusConfig } from '../styles'
+import { colors, buttons, cards, inputs, alerts, radius, typography, badges } from '../styles'
 
 const LIMIT_CERTS = 30
 const LIMIT_EVENTS = 1
 const STORAGE_KEY_CERTS = 'generar_simple_count'
 const STORAGE_KEY_EVENTS = 'eventos_creados'
+const DEFAULT_LIMIT_TYPE = 'certs'
 
 export default function Eventos() {
   const navigate = useNavigate()
@@ -17,7 +18,6 @@ export default function Eventos() {
   const [eventosCreados, setEventosCreados] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showLimitModal, setShowLimitModal] = useState(false)
-  const [limitType, setLimitType] = useState('certs')
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -37,8 +37,8 @@ export default function Eventos() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      const savedCount = parseInt(localStorage.getItem(STORAGE_KEY_CERTS) || '0', 10)
-      const savedEvents = parseInt(localStorage.getItem(STORAGE_KEY_EVENTS) || '0', 10)
+      const savedCount = Number.parseInt(localStorage.getItem(STORAGE_KEY_CERTS) || '0', 10)
+      const savedEvents = Number.parseInt(localStorage.getItem(STORAGE_KEY_EVENTS) || '0', 10)
       setCount(savedCount)
       setEventosCreados(savedEvents)
     }
@@ -60,7 +60,7 @@ export default function Eventos() {
   const handleLogout = () => {
     localStorage.clear()
     navigate('/')
-    window.location.reload()
+    globalThis.location.reload()
   }
 
   const handleSubmit = async (e) => {
@@ -114,7 +114,6 @@ export default function Eventos() {
   }
 
   const remainingCerts = LIMIT_CERTS - count
-  const remainingEvents = LIMIT_EVENTS - eventosCreados
   const canCreateEvent = isLoggedIn || eventosCreados < LIMIT_EVENTS
 
   return (
@@ -198,9 +197,9 @@ export default function Eventos() {
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
               <h2 style={{ ...typography.h3, marginBottom: '0.75rem' }}>Límite alcanzado</h2>
               <p style={{ ...typography.body, marginBottom: '1rem' }}>
-                {limitType === 'certs' ? `Ya generaste ${count} certificado(s) gratuito(s). Solo puedes generar ${LIMIT_CERTS}.` : `Ya creaste ${eventosCreados} evento(s). Solo puedes crear ${LIMIT_EVENTS}.`}
+                {DEFAULT_LIMIT_TYPE === 'certs' ? `Ya generaste ${count} certificado(s) gratuito(s). Solo puedes generar ${LIMIT_CERTS}.` : `Ya creaste ${eventosCreados} evento(s). Solo puedes crear ${LIMIT_EVENTS}.`}
               </p>
-              <p style={{ ...typography.small, marginBottom: '1.5rem' }}>Inicia sesión para {limitType === 'certs' ? 'generar certificados' : 'crear más eventos'} de forma ilimitada.</p>
+              <p style={{ ...typography.small, marginBottom: '1.5rem' }}>Inicia sesión para {DEFAULT_LIMIT_TYPE === 'certs' ? 'generar certificados' : 'crear más eventos'} de forma ilimitada.</p>
               <button onClick={() => navigate('/login')} style={{ ...buttons.primary, width: '100%' }}>
                 Iniciar Sesión
               </button>

@@ -1,7 +1,7 @@
 // src/pages/Certificados.jsx
 import { useState, useEffect } from 'react'
 import api from '../api/axios'
-import { colors, styles, statusConfig } from '../styles'
+import { colors, styles } from '../styles'
 
 export default function Certificados() {
   const [eventos,       setEventos]       = useState([])
@@ -72,18 +72,21 @@ export default function Certificados() {
 
   // ── UI helpers ──────────────────────────────────────────────
   const StepDot = ({ n, label }) => {
-    const idx = parseInt(n)
+    const idx = Number.parseInt(n)
     const done = step > idx
     const active = step === idx
+    const stepColor = done ? colors.mint : active ? colors.gold : 'rgba(255,255,255,0.05)'
+    const stepBorder = done ? colors.mintBorder : active ? colors.goldBorder : colors.border
+    const stepTextColor = done || active ? colors.bg : colors.textDim
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
         <div style={{
           width: '26px', height: '26px', borderRadius: '50%',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '11px', fontWeight: 700,
-          background: done ? colors.mint : active ? colors.gold : 'rgba(255,255,255,0.05)',
-          color: done || active ? colors.bg : colors.textDim,
-          border: `1px solid ${done ? colors.mintBorder : active ? colors.goldBorder : colors.border}`,
+          background: stepColor,
+          color: stepTextColor,
+          border: `1px solid ${stepBorder}`,
           transition: 'all .3s',
         }}>
           {done ? '✓' : n}
@@ -151,8 +154,9 @@ export default function Certificados() {
       <CardSection n="1" title="Selecciona evento y sube el Excel" sub="Columnas: document_id, first_name, last_name, email, phone">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label style={styles.label}>Evento</label>
+            <label htmlFor="eventoSelect" style={styles.label}>Evento</label>
             <select
+              id="eventoSelect"
               value={eventoId}
               onChange={e => { setEventoId(e.target.value); setCerts([]); setStep(1) }}
               className="cp-input"

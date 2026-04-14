@@ -16,7 +16,6 @@ export default function GeneradorCertificados() {
     fontColor: '#000000',
   })
 
-  const [excelFile, setExcelFile] = useState(null)
   const [excelData, setExcelData] = useState([])
   const [previewIndex, setPreviewIndex] = useState(0)
 
@@ -156,14 +155,14 @@ export default function GeneradorCertificados() {
       const generados = res.headers['x-generados'] || 0
       const emails = res.headers['x-emails'] || 0
       
-      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const url = globalThis.URL.createObjectURL(new Blob([res.data]))
       const link = document.createElement('a')
       link.href = url
       link.setAttribute('download', 'certificados.zip')
       document.body.appendChild(link)
       link.click()
-      link.parentNode.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      link.remove()
+      globalThis.URL.revokeObjectURL(url)
       
       setMsg(`✓ ${generados} certificados generados y ${emails} emails enviados`)
       setError('')
@@ -299,7 +298,7 @@ export default function GeneradorCertificados() {
                     max="80"
                     value={templateData.fontSize}
                     onChange={(e) =>
-                      setTemplateData({ ...templateData, fontSize: parseInt(e.target.value) })
+                      setTemplateData({ ...templateData, fontSize: Number.parseInt(e.target.value) })
                     }
                     style={{ width: '100%', height: '6px' }}
                   />
@@ -328,7 +327,7 @@ export default function GeneradorCertificados() {
                     min="0"
                     max={Math.max(0, excelData.length - 1)}
                     value={previewIndex}
-                    onChange={(e) => setPreviewIndex(parseInt(e.target.value))}
+                    onChange={(e) => setPreviewIndex(Number.parseInt(e.target.value))}
                     style={{ width: '100%', height: '6px' }}
                   />
                   <div style={{ color: colors.gold, fontSize: '0.7rem', marginTop: '0.25rem', padding: '0.4rem', background: colors.dark, borderRadius: '4px' }}>

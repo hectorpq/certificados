@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { colors, styles } from '../styles'
+import { colors } from '../styles'
 
 const LIMIT_CERTS = 30
 const STORAGE_KEY_CERTS = 'generar_simple_count'
@@ -67,7 +67,6 @@ export default function EventoDetalle() {
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [limitMessage, setLimitMessage] = useState('')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
   const [event, setEvent] = useState(null)
   const [invitations, setInvitations] = useState([])
   const [stats, setStats] = useState({})
@@ -77,7 +76,6 @@ export default function EventoDetalle() {
   const [msg, setMsg] = useState('')
   const [actionError, setActionError] = useState('')
   const [sending, setSending] = useState(false)
-  const [generating, setGenerating] = useState(false)
   const [showAppPasswordWarning, setShowAppPasswordWarning] = useState(false)
   const [certificates, setCertificates] = useState([])
   const [certStats, setCertStats] = useState({})
@@ -105,8 +103,8 @@ export default function EventoDetalle() {
     setError(null)
     
     if (!isLoggedIn) {
-      const savedCerts = parseInt(localStorage.getItem(STORAGE_KEY_CERTS) || '0', 10)
-      const savedInvitations = parseInt(localStorage.getItem(STORAGE_KEY_INVITATIONS) || '0', 10)
+      const savedCerts = Number.parseInt(localStorage.getItem(STORAGE_KEY_CERTS) || '0', 10)
+      const savedInvitations = Number.parseInt(localStorage.getItem(STORAGE_KEY_INVITATIONS) || '0', 10)
       setCountCerts(savedCerts)
       setCountInvitations(savedInvitations)
     }
@@ -136,7 +134,7 @@ export default function EventoDetalle() {
     localStorage.removeItem('is_admin')
     localStorage.removeItem('admin_mode')
     localStorage.removeItem('user_id')
-    window.location.href = '/'
+    globalThis.location.href = '/'
   }
 
   const loadEvent = async () => {
@@ -375,7 +373,6 @@ export default function EventoDetalle() {
 
     try {
       const res = await api.post(`/events/${id}/create_invitations/`, formData)
-      console.log('Upload response:', res.data)
       
       const { created = 0, skipped = 0, errors = [] } = res.data
       
@@ -417,7 +414,6 @@ export default function EventoDetalle() {
 
     try {
       const res = await api.post(`/events/${id}/send_invitations/`, { via })
-      console.log('Send response:', res.data)
       
       const { sent_email = 0, sent_whatsapp = 0, message = '', errors = [] } = res.data
       
@@ -471,40 +467,6 @@ export default function EventoDetalle() {
     }
   }
 
-  // Generar certificados desde Excel
-  const handleGenerateExcel = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    setGenerating(true)
-    setActionError('')
-    setMsg('')
-
-    const formData = new FormData()
-    formData.append('file', file)
-
-    try {
-      const res = await api.post(`/events/${id}/generar_certificados/`, formData)
-      console.log('Generate response:', res.data)
-      
-      const { created = 0, skipped = 0, errors = [] } = res.data
-      
-      loadCertificates()
-      
-      let msgText = `✓ ${created} certificado(s) creado(s)`
-      if (skipped > 0) msgText += `, ${skipped} omitido(s)`
-      if (errors && errors.length > 0) msgText += `. ${errors.length} error(es)`
-      
-      setMsg(msgText)
-    } catch (err) {
-      console.error('Generate error:', err)
-      const errorMsg = err.response?.data?.error || err.response?.data?.detail || err.message || 'No se pudieron crear los certificados. Verifica que el Excel tenga columnas "nombre" y "email".'
-      setActionError(errorMsg)
-    } finally {
-      setGenerating(false)
-    }
-  }
-
   // Enviar certificados
   const handleSendCertificates = async () => {
     setSending(true)
@@ -550,7 +512,7 @@ export default function EventoDetalle() {
             <h2 style={{ color: colors.text, marginBottom: '0.5rem' }}>{error}</h2>
             <p style={{ color: 'rgba(240,237,232,0.5)', marginBottom: '1.5rem' }}>El evento puede que no exista o hay un problema de conexión.</p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => window.location.reload()} style={{ padding: '0.75rem 1.5rem', background: colors.gold, color: colors.bg, border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+              <button onClick={() => globalThis.location.reload()} style={{ padding: '0.75rem 1.5rem', background: colors.gold, color: colors.bg, border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
                 Reintentar
               </button>
               <Link to="/" style={{ padding: '0.75rem 1.5rem', background: 'transparent', color: colors.gold, border: '1px solid #d4a361', borderRadius: '10px', textDecoration: 'none' }}>

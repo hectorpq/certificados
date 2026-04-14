@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import api from '../api/axios'
 import { colors, styles } from '../styles'
 
+
 function Header() {
   return (
     <header style={{
@@ -29,6 +30,202 @@ function Header() {
         </p>
       </div>
     </header>
+  )
+}
+
+
+function LoadingView() {
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg }}>
+      <Header />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)' }}>
+        <div style={{ color: colors.textMuted }}>Cargando...</div>
+      </div>
+    </div>
+  )
+}
+
+
+function ErrorView({ error }) {
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg }}>
+      <Header />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)' }}>
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>❌</div>
+          <h2 style={{ color: colors.red, marginBottom: '0.5rem' }}>{error}</h2>
+          <p style={{ color: colors.textMuted }}>El enlace puede haber expirado o ser inválido</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function SuccessView({ email }) {
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg }}>
+      <Header />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '2rem' }}>
+        <div style={{ ...styles.card, textAlign: 'center', padding: '2.5rem', maxWidth: '450px', width: '100%' }}>
+          <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>🎉</div>
+          <h2 style={{ color: colors.green, marginBottom: '0.5rem', fontSize: '1.5rem' }}>¡Listo!</h2>
+          <p style={{ color: colors.text, marginBottom: '1.5rem' }}>
+            Tu asistencia ha sido confirmada
+          </p>
+          <div style={{ background: colors.greenMuted, borderRadius: '12px', padding: '1rem', marginBottom: '1rem' }}>
+            <p style={{ color: colors.mint, fontSize: '0.875rem', margin: 0 }}>
+              📧 Recibirás el certificado a: <strong>{email}</strong>
+            </p>
+          </div>
+          <p style={{ color: colors.textMuted, fontSize: '0.875rem' }}>
+            El certificado se enviará cuando el organizador lo genere
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function AlreadyAcceptedView({ email }) {
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg }}>
+      <Header />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '2rem' }}>
+        <div style={{ ...styles.card, textAlign: 'center', padding: '2.5rem', maxWidth: '450px', width: '100%' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✓</div>
+          <h2 style={{ color: colors.amber, marginBottom: '0.5rem', fontSize: '1.25rem' }}>Ya aceptaste esta invitación</h2>
+          <p style={{ color: colors.textMuted }}>
+            Tu asistencia ya fue confirmada anteriormente
+          </p>
+          <p style={{ color: colors.textMuted, fontSize: '0.875rem', marginTop: '1rem' }}>
+            📧 El certificado se enviará a: <strong>{email}</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function EventDetails({ invitation, formatDate }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+      {invitation?.event_date && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: colors.textMuted }}>
+          <span style={{ fontSize: '1.25rem' }}>📅</span>
+          <span>{formatDate(invitation.event_date)}</span>
+        </div>
+      )}
+      {invitation?.event_location && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: colors.textMuted }}>
+          <span style={{ fontSize: '1.25rem' }}>📍</span>
+          <span>{invitation.event_location}</span>
+        </div>
+      )}
+      {invitation?.instructor_name && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: colors.textMuted }}>
+          <span style={{ fontSize: '1.25rem' }}>👨‍🏫</span>
+          <span>{invitation.instructor_name}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+
+function InvitationForm({ firstName, lastName, email, error, submitting, onFirstNameChange, onLastNameChange, onAccept, onDecline, onCopyLink, isExpired }) {
+  const canSubmit = submitting || !firstName.trim()
+  
+  return (
+    <>
+      <div style={{ marginBottom: '1rem' }}>
+        <label style={styles.label}>
+          Tu nombre *
+        </label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <input 
+            style={styles.input}
+            value={firstName} 
+            onChange={e => onFirstNameChange(e.target.value)} 
+            placeholder="Nombre" 
+          />
+          <input 
+            style={styles.input}
+            value={lastName} 
+            onChange={e => onLastNameChange(e.target.value)} 
+            placeholder="Apellido" 
+          />
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '1rem' }}>
+        <label style={styles.label}>
+          Correo electrónico
+        </label>
+        <input 
+          style={{ ...styles.input, opacity: 0.6 }} 
+          value={email} 
+          disabled 
+          placeholder="correo@ejemplo.com"
+        />
+      </div>
+
+      {error && (
+        <div style={{ ...styles.alertError, marginBottom: '1rem' }}>
+          ✕ {error}
+        </div>
+      )}
+
+      <button
+        onClick={onAccept}
+        disabled={canSubmit}
+        style={{
+          ...styles.btnPrimary,
+          background: colors.green,
+          marginBottom: '0.75rem',
+          opacity: canSubmit ? 0.5 : 1,
+          cursor: canSubmit ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {submitting ? 'Procesando...' : '✓ Aceptar Invitación'}
+      </button>
+
+      <button
+        onClick={onDecline}
+        disabled={submitting}
+        style={{
+          width: '100%',
+          padding: '0.75rem',
+          background: 'transparent',
+          color: colors.textMuted,
+          border: 'none',
+          fontSize: '0.875rem',
+          cursor: submitting ? 'not-allowed' : 'pointer',
+          opacity: submitting ? 0.5 : 1,
+        }}
+      >
+        Prefiero no asistir
+      </button>
+
+      <button
+        onClick={onCopyLink}
+        style={{
+          width: '100%',
+          padding: '0.75rem',
+          background: colors.blueMuted,
+          color: colors.blue,
+          border: `1px solid ${colors.blueBorder}`,
+          borderRadius: '12px',
+          fontSize: '0.875rem',
+          cursor: 'pointer',
+          marginTop: '0.5rem',
+        }}
+      >
+        🔗 Copiar enlace para compartir
+      </button>
+    </>
   )
 }
 
@@ -106,82 +303,26 @@ export default function InvitacionPublica() {
   }
 
   const copyLink = () => {
-    const url = window.location.href
+    const url = globalThis.location.href
     navigator.clipboard.writeText(url).then(() => {
       alert('Enlace copiado. Puedes pegarlo en WhatsApp, email o cualquier app.')
     })
   }
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', background: colors.bg }}>
-        <Header />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)' }}>
-          <div style={{ color: colors.textMuted }}>Cargando...</div>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <LoadingView />
 
-  if (error && !invitation) {
-    return (
-      <div style={{ minHeight: '100vh', background: colors.bg }}>
-        <Header />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)' }}>
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>❌</div>
-            <h2 style={{ color: colors.red, marginBottom: '0.5rem' }}>{error}</h2>
-            <p style={{ color: colors.textMuted }}>El enlace puede haber expirado o ser inválido</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (error && !invitation) return <ErrorView error={error} />
 
-  if (success) {
-    return (
-      <div style={{ minHeight: '100vh', background: colors.bg }}>
-        <Header />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '2rem' }}>
-          <div style={{ ...styles.card, textAlign: 'center', padding: '2.5rem', maxWidth: '450px', width: '100%' }}>
-            <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>🎉</div>
-            <h2 style={{ color: colors.green, marginBottom: '0.5rem', fontSize: '1.5rem' }}>¡Listo!</h2>
-            <p style={{ color: colors.text, marginBottom: '1.5rem' }}>
-              Tu asistencia ha sido confirmada
-            </p>
-            <div style={{ background: colors.greenMuted, borderRadius: '12px', padding: '1rem', marginBottom: '1rem' }}>
-              <p style={{ color: colors.mint, fontSize: '0.875rem', margin: 0 }}>
-                📧 Recibirás el certificado a: <strong>{email || invitation?.student_email}</strong>
-              </p>
-            </div>
-            <p style={{ color: colors.textMuted, fontSize: '0.875rem' }}>
-              El certificado se enviará cuando el organizador lo genere
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const displayEmail = email || invitation?.student_email
 
-  if (invitation?.already_accepted) {
-    return (
-      <div style={{ minHeight: '100vh', background: colors.bg }}>
-        <Header />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '2rem' }}>
-          <div style={{ ...styles.card, textAlign: 'center', padding: '2.5rem', maxWidth: '450px', width: '100%' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✓</div>
-            <h2 style={{ color: colors.amber, marginBottom: '0.5rem', fontSize: '1.25rem' }}>Ya aceptaste esta invitación</h2>
-            <p style={{ color: colors.textMuted }}>
-              Tu asistencia ya fue confirmada anteriormente
-            </p>
-            <p style={{ color: colors.textMuted, fontSize: '0.875rem', marginTop: '1rem' }}>
-              📧 El certificado se enviará a: <strong>{email || invitation?.student_email}</strong>
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (success) return <SuccessView email={displayEmail} />
+
+  if (invitation?.already_accepted) return <AlreadyAcceptedView email={displayEmail} />
+
+  const isExpired = invitation?.is_expired
+  const displayEventDetails = (
+    <EventDetails invitation={invitation} formatDate={formatDate} />
+  )
 
   return (
     <div style={{ minHeight: '100vh', background: colors.bg }}>
@@ -197,26 +338,7 @@ export default function InvitacionPublica() {
             {invitation?.event_name}
           </h1>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
-            {invitation?.event_date && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: colors.textMuted }}>
-                <span style={{ fontSize: '1.25rem' }}>📅</span>
-                <span>{formatDate(invitation.event_date)}</span>
-              </div>
-            )}
-            {invitation?.event_location && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: colors.textMuted }}>
-                <span style={{ fontSize: '1.25rem' }}>📍</span>
-                <span>{invitation.event_location}</span>
-              </div>
-            )}
-            {invitation?.instructor_name && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: colors.textMuted }}>
-                <span style={{ fontSize: '1.25rem' }}>👨‍🏫</span>
-                <span>{invitation.instructor_name}</span>
-              </div>
-            )}
-          </div>
+          {displayEventDetails}
 
           {invitation?.invitation_message && (
             <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
@@ -226,102 +348,28 @@ export default function InvitacionPublica() {
             </div>
           )}
 
-          {invitation?.is_expired ? (
+          {isExpired ? (
             <div style={{ background: colors.redMuted, border: `1px solid ${colors.redBorder}`, borderRadius: '12px', padding: '1rem', textAlign: 'center', color: colors.red }}>
               ⏰ Esta invitación ha expirado
             </div>
           ) : (
-            <>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={styles.label}>
-                  Tu nombre *
-                </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <input 
-                    style={styles.input}
-                    value={firstName} 
-                    onChange={e => setFirstName(e.target.value)} 
-                    placeholder="Nombre" 
-                  />
-                  <input 
-                    style={styles.input}
-                    value={lastName} 
-                    onChange={e => setLastName(e.target.value)} 
-                    placeholder="Apellido" 
-                  />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={styles.label}>
-                  Correo electrónico
-                </label>
-                <input 
-                  style={{ ...styles.input, opacity: 0.6 }} 
-                  value={email || invitation?.student_email || ''} 
-                  disabled 
-                  placeholder="correo@ejemplo.com"
-                />
-              </div>
-
-              {error && (
-                <div style={{ ...styles.alertError, marginBottom: '1rem' }}>
-                  ✕ {error}
-                </div>
-              )}
-
-              <button
-                onClick={handleAccept}
-                disabled={submitting || !firstName.trim()}
-                style={{
-                  ...styles.btnPrimary,
-                  background: colors.green,
-                  marginBottom: '0.75rem',
-                  opacity: submitting || !firstName.trim() ? 0.5 : 1,
-                  cursor: submitting || !firstName.trim() ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {submitting ? 'Procesando...' : '✓ Aceptar Invitación'}
-              </button>
-
-              <button
-                onClick={handleDecline}
-                disabled={submitting}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  background: 'transparent',
-                  color: colors.textMuted,
-                  border: 'none',
-                  fontSize: '0.875rem',
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                  opacity: submitting ? 0.5 : 1,
-                }}
-              >
-                Prefiero no asistir
-              </button>
-
-              <button
-                onClick={copyLink}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  background: colors.blueMuted,
-                  color: colors.blue,
-                  border: `1px solid ${colors.blueBorder}`,
-                  borderRadius: '12px',
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  marginTop: '0.5rem',
-                }}
-              >
-                🔗 Copiar enlace para compartir
-              </button>
-            </>
+            <InvitationForm
+              firstName={firstName}
+              lastName={lastName}
+              email={displayEmail}
+              error={error}
+              submitting={submitting}
+              onFirstNameChange={setFirstName}
+              onLastNameChange={setLastName}
+              onAccept={handleAccept}
+              onDecline={handleDecline}
+              onCopyLink={copyLink}
+              isExpired={isExpired}
+            />
           )}
         </div>
 
-        {invitation && !invitation.is_expired && (
+        {invitation && !isExpired && (
           <p style={{ textAlign: 'center', fontSize: '0.75rem', color: colors.textDim }}>
             ⏱️ Esta invitación expira en {invitation.time_until_expiry}
           </p>

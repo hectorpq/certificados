@@ -17,11 +17,11 @@ export default function GenerarSimple() {
   const [success, setSuccess] = useState(false)
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [preview, setPreview] = useState([])
-  const [positions, setPositions] = useState({ x: 200, y: 300, font_size: 32, font_color: '#000000' })
+  const [positions] = useState({ x: 200, y: 300, font_size: 32, font_color: '#000000' })
 
   useEffect(() => {
     if (!isLoggedIn) {
-      const savedCount = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
+      const savedCount = Number.parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
       setCount(savedCount)
       if (savedCount >= LIMIT) {
         setShowLimitModal(true)
@@ -103,14 +103,14 @@ export default function GenerarSimple() {
 
       if (response.ok) {
         const blob = await response.blob()
-        const downloadUrl = window.URL.createObjectURL(blob)
+        const downloadUrl = globalThis.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = downloadUrl
         a.download = 'certificados.zip'
         document.body.appendChild(a)
         a.click()
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(downloadUrl)
+        a.remove()
+        globalThis.URL.revokeObjectURL(downloadUrl)
 
         if (!isLoggedIn) {
           updateCount(count + fileCount)
@@ -213,7 +213,11 @@ export default function GenerarSimple() {
         <button
           onClick={handleGenerate}
           disabled={loading || !excelFile}
-          style={{ ...styles.btnPrimary, opacity: loading || !excelFile ? 0.5 : 1, cursor: loading || !excelFile ? 'not-allowed' : 'pointer' }}
+          style={{ 
+            ...styles.btnPrimary, 
+            opacity: (loading || !excelFile) ? 0.5 : 1, 
+            cursor: (loading || !excelFile) ? 'not-allowed' : 'pointer' 
+          }}
         >
           {loading ? 'Generando...' : 'Generar y Descargar ZIP'}
         </button>
